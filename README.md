@@ -16,7 +16,7 @@ Follow these steps to get a copy of the config up and running.
 ### Prerequisites
 
 ```bash
-yarn add --dev @smolpack/eslint-config eslint eslint-plugin-import eslint-config-typescript-sort-imports @typescript-eslint/eslint-plugin
+yarn add --dev @smolpack/eslint-config eslint eslint-plugin-import eslint-import-resolver-typescript eslint-config-typescript-sort-imports @typescript-eslint/eslint-plugin
 ```
 
 ## Usage
