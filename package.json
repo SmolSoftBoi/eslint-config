@@ -17,7 +17,7 @@
   "devDependencies": {
     "@smolpack/prettier-config": "^1.0.5",
     "@typescript-eslint/eslint-plugin": "^8.16.0",
-    "@typescript-eslint/parser": "^8.15.0",
+    "@typescript-eslint/parser": "^8.16.0",
     "eslint": "^9.15.0",
     "eslint-config-typescript-sort-imports": "^2.28.1",
     "eslint-import-resolver-typescript": "^3.6.1",
