@@ -16,21 +16,53 @@ Follow these steps to get a copy of the config up and running.
 ### Prerequisites
 
 ```bash
-yarn add --dev @smolpack/eslint-config eslint eslint-plugin-import eslint-import-resolver-typescript eslint-config-typescript-sort-imports @typescript-eslint/eslint-plugin
+yarn add --dev \
+  @smolpack/eslint-config \
+  eslint \
+  @eslint/js \
+  typescript \
+  typescript-eslint \
+  eslint-plugin-import \
+  eslint-import-resolver-typescript \
+  eslint-config-prettier
 ```
 
 ## Usage
 
-This is a basic example of how to use the project.
+This package is an **ESM** ESLint **flat config** preset.
 
-1. Use the config:
+1. Create (or update) your project’s `eslint.config.mjs`:
 
-```javascript
-module.exports = {
-  extends: [
-    "@smolpack"
-  ]
-}
+### Minimal
+
+```js
+// eslint.config.mjs
+export { default } from '@smolpack/eslint-config';
+```
+
+### With local overrides
+
+```js
+// eslint.config.mjs
+import smolpack from '@smolpack/eslint-config';
+
+export default [
+  ...smolpack,
+  {
+    ignores: ['dist/', 'coverage/', '.yarn/'],
+  },
+  {
+    rules: {
+      // Your local project overrides go here
+    },
+  },
+];
+```
+
+2. Run ESLint:
+
+```bash
+yarn eslint .
 ```
 
 ## Support

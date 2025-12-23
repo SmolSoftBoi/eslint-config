@@ -13,3 +13,7 @@
 .pnp.*
 
 node_modules
+
+# Lockfile drift prevention (this repo uses Yarn)
+package-lock.json
+pnpm-lock.yaml
