@@ -6,7 +6,7 @@ on:
     branches:
       - '**'
     tags-ignore:
-      - 'v*'
+      - 'v[0-9]*'
 
 concurrency:
   group: ci-${{ github.ref }}
