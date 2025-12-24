@@ -10,7 +10,7 @@ set -euo pipefail
 echo "[yarn-install-immutable] yarn --version: $(yarn --version 2>/dev/null || true)"
 
 echo "[yarn-install-immutable] Running: yarn install --immutable"
-immutable_log="$(mktemp -t yarn-install-immutable.XXXXXX.log)"
+immutable_log="$(mktemp "${TMPDIR:-/tmp}/yarn-install-immutable.XXXXXX.log")"
 cleanup() {
   rm -f "$immutable_log"
 }
