@@ -12,7 +12,7 @@ on:
         type: boolean
         default: false
       skip_validation:
-        description: 'Set to true to bypass tag/version/release-notes validation (not recommended)'
+        description: 'Emergency override: set to true only if automated tag/version/release-notes validation is temporarily broken and you have manually verified all release details (use with extreme caution)'
         required: true
         type: boolean
         default: false
