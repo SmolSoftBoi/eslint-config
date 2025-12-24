@@ -59,7 +59,7 @@ jobs:
 
             # Fetch the corresponding GitHub Release so manual runs still enforce release notes.
             API_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/${TAG}"
-            RELEASE_JSON=$(curl -fsSL \
+            RELEASE_JSON=$(curl -fSL \
               -H "Authorization: Bearer ${GITHUB_TOKEN}" \
               -H "X-GitHub-Api-Version: 2022-11-28" \
               -H "Accept: application/vnd.github+json" \
