@@ -1,14 +1,14 @@
 // Consumer-style import smoke test helper.
 //
 // Usage:
-//   node scripts/smoke-import-packed.mjs "@scope/pkg"
+//   node scripts/smoke-import-packed.mjs '@scope/pkg'
 //
 // Exits non-zero on failure.
 
 const pkgName = process.argv[2];
 
 if (!pkgName) {
-  console.error('Missing package name argument. Usage: node scripts/smoke-import-packed.mjs "@scope/pkg"');
+  console.error('Missing package name argument. Usage: node scripts/smoke-import-packed.mjs \'@scope/pkg\'');
   process.exit(2);
 }
 
