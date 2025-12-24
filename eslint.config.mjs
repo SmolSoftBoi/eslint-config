@@ -11,6 +11,15 @@ export default typescriptEslint.config(
     ignores: ['.pnp.cjs', '.pnp.loader.mjs']
   },
   {
+    files: ['scripts/**/*.mjs'],
+    languageOptions: {
+      globals: {
+        console: 'readonly',
+        process: 'readonly'
+      }
+    }
+  },
+  {
     // Ensure eslint-plugin-import can resolve ESM + TS ecosystem deps in this repo.
     settings: {
       'import/resolver': {

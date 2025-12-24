@@ -14,7 +14,7 @@ if (!pkgName) {
 
 try {
   const mod = await import(pkgName);
-  if (mod?.default === undefined) {
+  if (!('default' in mod)) {
     throw new Error('Expected default export');
   }
 } catch (err) {

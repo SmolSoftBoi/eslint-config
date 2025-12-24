@@ -7,7 +7,20 @@ set -euo pipefail
 
 ROOT_DIR="$(pwd)"
 
-PKG_NAME="$(node --input-type=module -e "import { readFileSync } from 'node:fs'; console.log(JSON.parse(readFileSync('./package.json', 'utf8')).name)")"
+if ! PKG_NAME="$(node --input-type=module -e "import { readFileSync } from 'node:fs';
+try {
+  const pkg = JSON.parse(readFileSync('./package.json', 'utf8'));
+  if (!pkg?.name || typeof pkg.name !== 'string') {
+    throw new Error('package.json is missing a valid \"name\" field');
+  }
+  console.log(pkg.name);
+} catch (e) {
+  console.error('Failed to read package name from package.json:', e?.message ?? e);
+  process.exit(1);
+}")"; then
+  echo "::error::Failed to read package name from package.json"
+  exit 1
+fi
 echo "[smoke-import-packed] Package: ${PKG_NAME}"
 
 tmp="$(mktemp -d)"
@@ -22,7 +35,10 @@ echo "[smoke-import-packed] Temp dir: $tmp"
 # (Yarn pack would also work, but npm pack is the closest representation of registry output.)
 
 echo "[smoke-import-packed] Packing..."
-TARBALL_FILE="$(npm pack --silent)"
+if ! TARBALL_FILE="$(npm pack --json | node "$ROOT_DIR/scripts/parse-npm-pack-filename.mjs")"; then
+  echo "::error::npm pack failed"
+  exit 1
+fi
 TARBALL_PATH="$ROOT_DIR/$TARBALL_FILE"
 
 echo "[smoke-import-packed] Tarball: $TARBALL_PATH"

@@ -10,12 +10,25 @@ set -euo pipefail
 echo "[yarn-install-immutable] yarn --version: $(yarn --version 2>/dev/null || true)"
 
 echo "[yarn-install-immutable] Running: yarn install --immutable"
-if yarn install --immutable; then
+immutable_log="$(mktemp -t yarn-install-immutable.XXXXXX.log)"
+cleanup() {
+  rm -f "$immutable_log"
+}
+trap cleanup EXIT
+
+if yarn install --immutable 2>"$immutable_log"; then
   echo "[yarn-install-immutable] Immutable install succeeded"
   exit 0
 fi
 
-echo "::warning::yarn install --immutable failed. The lockfile may be out of sync. Falling back to yarn install. Run yarn install locally and commit the updated yarn.lock if it changes."
+echo "::warning::yarn install --immutable failed. Showing stderr (last 200 lines, or fewer) for debugging:"
+if [ -s "$immutable_log" ]; then
+  tail -n 200 "$immutable_log" || true
+else
+  echo "[yarn-install-immutable] No stderr captured."
+fi
+
+echo "::warning::Falling back to yarn install. The lockfile may be out of sync. Run yarn install locally and commit the updated yarn.lock if it changes."
 
 echo "[yarn-install-immutable] Running: yarn install"
 yarn install

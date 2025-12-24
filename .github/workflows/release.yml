@@ -56,10 +56,22 @@ jobs:
         with:
           node-version: lts/*
           registry-url: https://registry.npmjs.org/
-          cache: yarn
 
       - name: Enable Corepack
         run: corepack enable
+
+      - name: Get Yarn cache directory
+        id: yarn-cache-dir
+        run: echo "dir=$(yarn config get cacheFolder)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Yarn
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.yarn-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-yarn-lts-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-lts-
+            ${{ runner.os }}-yarn-
 
       - name: Install dependencies (immutable, with fallback)
         run: bash ./scripts/yarn-install-immutable.sh
@@ -87,10 +99,22 @@ jobs:
         with:
           node-version: lts/*
           registry-url: https://registry.npmjs.org/
-          cache: yarn
 
       - name: Enable Corepack
         run: corepack enable
+
+      - name: Get Yarn cache directory
+        id: yarn-cache-dir
+        run: echo "dir=$(yarn config get cacheFolder)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Yarn
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.yarn-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-yarn-lts-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-lts-
+            ${{ runner.os }}-yarn-
 
       - name: Install dependencies (immutable, with fallback)
         run: bash ./scripts/yarn-install-immutable.sh
