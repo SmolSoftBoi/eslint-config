@@ -15,7 +15,13 @@ if (!pkgName) {
 try {
   const mod = await import(pkgName);
   if (!('default' in mod)) {
-    throw new Error('Expected default export');
+    const exportNames = Object.keys(mod);
+    throw new Error(
+      `Expected package "${pkgName}" to provide a default export (as documented for \`import config from '${pkgName}'\`). ` +
+      (exportNames.length
+        ? `Found only named exports: ${exportNames.join(', ')}.`
+        : 'No exports were found on the imported module.')
+    );
   }
 } catch (err) {
   console.error(err);
