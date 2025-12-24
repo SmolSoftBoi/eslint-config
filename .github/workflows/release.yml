@@ -46,7 +46,7 @@ jobs:
           # For release events, read tag/body from the event payload.
           # For workflow_dispatch, require that the run is started on a semver tag ref
           # and validate release notes by fetching the GitHub Release for that tag.
-          if [ "${GITHUB_EVENT_NAME}" = "release" ]; then
+          if [ "$GITHUB_EVENT_NAME" = "release" ]; then
             TAG=$(node --input-type=module -e "import { readFileSync } from 'node:fs'; const e = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8')); console.log(e.release?.tag_name ?? '');")
             RELEASE_BODY=$(node --input-type=module -e "import { readFileSync } from 'node:fs'; const e = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8')); console.log(e.release?.body ?? '');")
           else
