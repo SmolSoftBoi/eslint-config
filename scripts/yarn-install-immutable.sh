@@ -7,6 +7,21 @@ set -euo pipefail
 #
 # Intended for CI, but also usable locally.
 
+is_github_actions() {
+  [ "${GITHUB_ACTIONS:-}" = "true" ]
+}
+
+annotate() {
+  local level="$1"; shift
+  local msg="$*"
+
+  if is_github_actions; then
+    echo "::${level}::${msg}"
+  else
+    echo "${level}: ${msg}" >&2
+  fi
+}
+
 echo "[yarn-install-immutable] yarn --version: $(yarn --version 2>/dev/null || true)"
 
 echo "[yarn-install-immutable] Running: yarn install --immutable"
@@ -21,14 +36,14 @@ if yarn install --immutable 2>"$immutable_log"; then
   exit 0
 fi
 
-echo "::warning::yarn install --immutable failed. Showing stderr (last 200 lines, or fewer) for debugging:"
+annotate warning "yarn install --immutable failed. Showing stderr (last 200 lines, or fewer) for debugging:"
 if [ -s "$immutable_log" ]; then
   tail -n 200 "$immutable_log" || true
 else
   echo "[yarn-install-immutable] No stderr captured."
 fi
 
-echo "::warning::Falling back to yarn install. The lockfile may be out of sync. Run yarn install locally and commit the updated yarn.lock if it changes."
+annotate warning "Falling back to yarn install. The lockfile may be out of sync. Run yarn install locally and commit the updated yarn.lock if it changes."
 
 echo "[yarn-install-immutable] Running: yarn install"
 yarn install
@@ -38,5 +53,5 @@ if command -v git >/dev/null 2>&1; then
   echo "[yarn-install-immutable] Verifying yarn.lock did not change"
   git diff --exit-code yarn.lock
 else
-  echo "::warning::git not found; skipping yarn.lock drift check"
+  annotate warning "git not found; skipping yarn.lock drift check"
 fi

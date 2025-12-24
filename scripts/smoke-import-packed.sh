@@ -5,6 +5,21 @@ set -euo pipefail
 # Packs the package, installs it into a temp directory, then imports by package name.
 # This catches packaging/export issues that a repo-relative import would miss.
 
+is_github_actions() {
+  [ "${GITHUB_ACTIONS:-}" = "true" ]
+}
+
+annotate() {
+  local level="$1"; shift
+  local msg="$*"
+
+  if is_github_actions; then
+    echo "::${level}::${msg}"
+  else
+    echo "${level}: ${msg}" >&2
+  fi
+}
+
 ROOT_DIR="$(pwd)"
 
 if ! PKG_NAME="$(node --input-type=module -e "import { readFileSync } from 'node:fs';
@@ -18,7 +33,7 @@ try {
   console.error('Failed to read package name from package.json:', e?.message ?? e);
   process.exit(1);
 }")"; then
-  echo "::error::Failed to read package name from package.json"
+  annotate error "Failed to read package name from package.json"
   exit 1
 fi
 echo "[smoke-import-packed] Package: ${PKG_NAME}"
@@ -36,7 +51,7 @@ echo "[smoke-import-packed] Temp dir: $tmp"
 
 echo "[smoke-import-packed] Packing..."
 if ! TARBALL_FILE="$(npm pack --json | node "$ROOT_DIR/scripts/parse-npm-pack-filename.mjs")"; then
-  echo "::error::npm pack failed"
+  annotate error "npm pack failed"
   exit 1
 fi
 TARBALL_PATH="$ROOT_DIR/$TARBALL_FILE"
