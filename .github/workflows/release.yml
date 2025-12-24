@@ -51,6 +51,14 @@ jobs:
             exit 1
           fi
 
+          # Verify package.json version matches release tag.
+          PKG_VERSION=$(node --input-type=module -e "import { readFileSync } from 'node:fs'; console.log(JSON.parse(readFileSync('./package.json', 'utf8')).version);")
+          TAG_VERSION="${TAG#v}"  # Strip leading 'v'
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::Version mismatch: package.json has $PKG_VERSION but release tag is $TAG (expected v$PKG_VERSION)."
+            exit 1
+          fi
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
