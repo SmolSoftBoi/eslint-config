@@ -15,7 +15,7 @@ if yarn install --immutable; then
   exit 0
 fi
 
-echo "::warning::yarn install --immutable failed; falling back to yarn install. If this changes yarn.lock, commit the lockfile."
+echo "::warning::yarn install --immutable failed. The lockfile may be out of sync. Falling back to yarn install. Run yarn install locally and commit the updated yarn.lock if it changes."
 
 echo "[yarn-install-immutable] Running: yarn install"
 yarn install

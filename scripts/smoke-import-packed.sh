@@ -7,7 +7,7 @@ set -euo pipefail
 
 ROOT_DIR="$(pwd)"
 
-PKG_NAME="$(node -p "require('./package.json').name")"
+PKG_NAME="$(node --input-type=module -e "import { readFileSync } from 'node:fs'; console.log(JSON.parse(readFileSync('./package.json', 'utf8')).name)")"
 echo "[smoke-import-packed] Package: ${PKG_NAME}"
 
 tmp="$(mktemp -d)"
@@ -34,9 +34,13 @@ cd "$tmp"
 npm init -y >/dev/null 2>&1
 npm install --silent --no-audit --no-fund "$TARBALL_PATH"
 
+# Run the import assertion from within the temp consumer project so Node resolves
+# the package from its local node_modules.
+cp "$ROOT_DIR/scripts/smoke-import-packed.mjs" ./smoke-import-packed.mjs
+
 # Import by package name as consumers do.
 # Also assert a default export exists, since the README implies default export usage.
 echo "[smoke-import-packed] Importing ${PKG_NAME}..."
-node --input-type=module -e "import('${PKG_NAME}').then((m)=>{ if (m.default === undefined) throw new Error('Expected default export'); }).catch((e)=>{ console.error(e); process.exit(1); })"
+node ./smoke-import-packed.mjs "$PKG_NAME"
 
 echo "[smoke-import-packed] OK"

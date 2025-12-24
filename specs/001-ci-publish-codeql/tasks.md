@@ -8,7 +8,7 @@ description: "Task list for feature implementation"
 
 **Input**: Design documents from `/specs/001-ci-publish-codeql/`
 
-**Available docs**: `spec.md`, `plan.md`, `research.md`, `data-model.md`, `quickstart.md`, `contracts/github-actions.md`
+**Available docs**: `spec.md`, `plan.md`, `research.md`, `data-model.md`, `quickstart.md`, `contracts/github-actions.md`, `checklists/requirements.md`
 
 **Tests**: No separate test framework is required for this feature. Validation is done via workflow runs plus local commands (`yarn eslint .`) and an import smoke-test.
 
