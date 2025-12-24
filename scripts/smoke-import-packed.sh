@@ -43,7 +43,20 @@ if [[ -z "${PKG_NAME:-}" ]]; then
 fi
 echo "[smoke-import-packed] Package: ${PKG_NAME}"
 
-tmp="$(mktemp -d -t smoke-import-packed.XXXXXX)"
+if ! tmp="$(mktemp -d -t smoke-import-packed.XXXXXX)"; then
+  annotate error "Failed to create temporary directory for smoke-import-packed test"
+  exit 1
+fi
+
+if [ ! -d "$tmp" ]; then
+  annotate error "Temporary path is not a directory: $tmp"
+  exit 1
+fi
+
+if ! chmod 700 "$tmp"; then
+  annotate error "Failed to set permissions on temporary directory: $tmp"
+  exit 1
+fi
 cleanup() {
   rm -rf "$tmp"
 }
