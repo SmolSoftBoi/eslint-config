@@ -18,9 +18,9 @@ description: "Task list for feature implementation"
 
 **Purpose**: Ensure the design docs and repo scaffolding are aligned and ready for implementation.
 
-- [ ] T001 Reconcile spec/plan/contracts to match desired triggers and matrices in `specs/001-ci-publish-codeql/spec.md`, `specs/001-ci-publish-codeql/plan.md`, `specs/001-ci-publish-codeql/contracts/github-actions.md`
-- [ ] T002 Update maintainer instructions to match final workflow behavior in `specs/001-ci-publish-codeql/quickstart.md` and `README.md`
-- [ ] T003 Ensure reusable workflow helper scripts directory exists and is documented in `scripts/` and `README.md`
+- [x] T001 Reconcile spec/plan/contracts to match desired triggers and matrices in `specs/001-ci-publish-codeql/spec.md`, `specs/001-ci-publish-codeql/plan.md`, `specs/001-ci-publish-codeql/contracts/github-actions.md`
+- [x] T002 Update maintainer instructions to match final workflow behavior in `specs/001-ci-publish-codeql/quickstart.md` and `README.md`
+- [x] T003 Ensure reusable workflow helper scripts directory exists and is documented in `scripts/` and `README.md`
 
 ---
 
@@ -30,9 +30,9 @@ description: "Task list for feature implementation"
 
 **⚠️ CRITICAL**: No user story workflow work should begin until this phase is complete.
 
-- [ ] T004 [P] Implement deterministic Yarn install helper with immutable+fallback+lockfile guard in `scripts/yarn-install-immutable.sh`
-- [ ] T005 [P] Implement consumer-style packed import smoke-test helper in `scripts/smoke-import-packed.sh`
-- [ ] T006 Standardize workflow conventions (permissions, concurrency, caching, Corepack) in `.github/workflows/ci.yml`, `.github/workflows/release.yml`, `.github/workflows/codeql.yml`
+- [x] T004 [P] Implement deterministic Yarn install helper with immutable+fallback+lockfile guard in `scripts/yarn-install-immutable.sh`
+- [x] T005 [P] Implement consumer-style packed import smoke-test helper in `scripts/smoke-import-packed.sh`
+- [x] T006 Standardize workflow conventions (permissions, concurrency, caching, Corepack) in `.github/workflows/ci.yml`, `.github/workflows/release.yml`, `.github/workflows/codeql.yml`
 
 **Checkpoint**: Shared scripts and conventions exist; story work can proceed.
 
@@ -46,12 +46,12 @@ description: "Task list for feature implementation"
 
 ### Implementation for User Story 1
 
-- [ ] T007 [US1] Update workflow triggers and concurrency in `.github/workflows/ci.yml` (run on `pull_request` and `push` to any branch, ignore version tags, cancel in-progress)
-- [ ] T008 [US1] Add Node version matrix (LTS + current) and Yarn caching in `.github/workflows/ci.yml`
-- [ ] T009 [US1] Use Corepack and deterministic install helper in `.github/workflows/ci.yml` (call `scripts/yarn-install-immutable.sh`)
-- [ ] T010 [US1] Run lint step `yarn eslint .` in `.github/workflows/ci.yml`
-- [ ] T011 [US1] Add packed import smoke-test step in `.github/workflows/ci.yml` (call `scripts/smoke-import-packed.sh`)
-- [ ] T012 [US1] Verify least-privilege permissions in `.github/workflows/ci.yml` (default `contents: read` only)
+- [x] T007 [US1] Update workflow triggers and concurrency in `.github/workflows/ci.yml` (run on `pull_request` and `push` to any branch, ignore version tags, cancel in-progress)
+- [x] T008 [US1] Add Node version matrix (LTS + current) and Yarn caching in `.github/workflows/ci.yml`
+- [x] T009 [US1] Use Corepack and deterministic install helper in `.github/workflows/ci.yml` (call `scripts/yarn-install-immutable.sh`)
+- [x] T010 [US1] Run lint step `yarn eslint .` in `.github/workflows/ci.yml`
+- [x] T011 [US1] Add packed import smoke-test step in `.github/workflows/ci.yml` (call `scripts/smoke-import-packed.sh`)
+- [x] T012 [US1] Verify least-privilege permissions in `.github/workflows/ci.yml` (default `contents: read` only)
 
 **Checkpoint**: CI provides a clear pass/fail signal on PRs and branch pushes (excluding version tags).
 
@@ -65,9 +65,9 @@ description: "Task list for feature implementation"
 
 ### Implementation for User Story 2
 
-- [ ] T013 [US2] Update triggers and concurrency for CodeQL in `.github/workflows/codeql.yml` (PR + push main + scheduled)
-- [ ] T014 [US2] Configure CodeQL init/analyze for JavaScript/TypeScript in `.github/workflows/codeql.yml`
-- [ ] T015 [US2] Verify least-privilege permissions for CodeQL in `.github/workflows/codeql.yml` (`contents: read`, `security-events: write`)
+- [x] T013 [US2] Update triggers and concurrency for CodeQL in `.github/workflows/codeql.yml` (PR + push main + scheduled)
+- [x] T014 [US2] Configure CodeQL init/analyze for JavaScript/TypeScript in `.github/workflows/codeql.yml`
+- [x] T015 [US2] Verify least-privilege permissions for CodeQL in `.github/workflows/codeql.yml` (`contents: read`, `security-events: write`)
 
 **Checkpoint**: CodeQL runs on PRs and on schedule and reports findings.
 
@@ -81,12 +81,12 @@ description: "Task list for feature implementation"
 
 ### Implementation for User Story 3
 
-- [ ] T016 [US3] Create/update release workflow triggers and concurrency in `.github/workflows/release.yml` (on GitHub `release.published` for semver tags + `workflow_dispatch` with confirmation input)
-- [ ] T017 [US3] Reuse CI checks in `.github/workflows/release.yml` (Corepack, deterministic install, `yarn eslint .`, packed import smoke-test)
-- [ ] T018 [US3] Implement npm publish step using `NPM_TOKEN` secret in `.github/workflows/release.yml`
-- [ ] T019 [US3] Implement scoped-package access logic (`--access public` only if `package.json#name` is scoped) in `.github/workflows/release.yml`
-- [ ] T020 [US3] Enable npm provenance publishing in `.github/workflows/release.yml` (use `--provenance` and required permissions such as `id-token: write`)
-- [ ] T021 [US3] Ensure publish never runs on PR events, manual publish is gated, and release notes are validated (non-empty GitHub Release body) before publishing in `.github/workflows/release.yml`
+- [x] T016 [US3] Create/update release workflow triggers and concurrency in `.github/workflows/release.yml` (on GitHub `release.published` for semver tags + `workflow_dispatch` with confirmation input)
+- [x] T017 [US3] Reuse CI checks in `.github/workflows/release.yml` (Corepack, deterministic install, `yarn eslint .`, packed import smoke-test)
+- [x] T018 [US3] Implement npm publish step using `NPM_TOKEN` secret in `.github/workflows/release.yml`
+- [x] T019 [US3] Implement scoped-package access logic (`--access public` only if `package.json#name` is scoped) in `.github/workflows/release.yml`
+- [x] T020 [US3] Enable npm provenance publishing in `.github/workflows/release.yml` (use `--provenance` and required permissions such as `id-token: write`)
+- [x] T021 [US3] Ensure publish never runs on PR events, manual publish is gated, and release notes are validated (non-empty GitHub Release body) before publishing in `.github/workflows/release.yml`
 
 **Checkpoint**: Release workflow safely publishes when configured and refuses to publish without confirmation.
 
@@ -96,9 +96,9 @@ description: "Task list for feature implementation"
 
 **Purpose**: Remove duplication, document the behavior, and validate end-to-end.
 
-- [ ] T022 [P] Remove or disable any legacy/duplicate publishing workflows in `.github/workflows/` (e.g., deprecate or delete `.github/workflows/npm-publish.yml`)
-- [ ] T023 Update documentation for CI and release process in `README.md` and `specs/001-ci-publish-codeql/quickstart.md`
-- [ ] T024 Run local validation steps and ensure they match workflows: `corepack enable`, `yarn install --immutable`, `yarn eslint .`, and packed import smoke-test (document exact commands in `specs/001-ci-publish-codeql/quickstart.md`)
+- [x] T022 [P] Remove or disable any legacy/duplicate publishing workflows in `.github/workflows/` (e.g., deprecate or delete `.github/workflows/npm-publish.yml`)
+- [x] T023 Update documentation for CI and release process in `README.md` and `specs/001-ci-publish-codeql/quickstart.md`
+- [x] T024 Run local validation steps and ensure they match workflows: `corepack enable`, `yarn install --immutable`, `yarn eslint .`, and packed import smoke-test (document exact commands in `specs/001-ci-publish-codeql/quickstart.md`)
 
 ---
 
