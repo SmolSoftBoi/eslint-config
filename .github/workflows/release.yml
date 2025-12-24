@@ -126,7 +126,7 @@ jobs:
     name: Publish to npm
     needs: checks
     runs-on: ubuntu-latest
-    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.confirm_publish)
+    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.confirm_publish == true)
     env:
       COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
 
