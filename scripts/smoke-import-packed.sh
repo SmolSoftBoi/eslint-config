@@ -36,6 +36,11 @@ try {
   annotate error "Failed to read package name from package.json"
   exit 1
 fi
+
+if [[ -z "${PKG_NAME:-}" ]]; then
+  annotate error "Package name is empty after reading package.json"
+  exit 1
+fi
 echo "[smoke-import-packed] Package: ${PKG_NAME}"
 
 tmp="$(mktemp -d -t smoke-import-packed.XXXXXX)"
