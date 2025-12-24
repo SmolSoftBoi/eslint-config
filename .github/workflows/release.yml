@@ -51,7 +51,7 @@ jobs:
             RELEASE_BODY=$(node --input-type=module -e "import { readFileSync } from 'node:fs'; const e = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8')); console.log(e.release?.body ?? '');")
           else
             if [[ "${GITHUB_REF}" != refs/tags/* ]]; then
-              echo "::error::Manual publish must run on a semver tag ref (refs/tags/vMAJOR.MINOR.PATCH...). Re-run this workflow selecting the tag as the ref."
+              echo "::error::Manual publish must run on a semver tag ref (refs/tags/vMAJOR.MINOR.PATCH...). In GitHub, go to the Actions tab, open the 'Release' workflow, click 'Run workflow', and in the 'Use workflow from' selector choose the desired tag (e.g. v1.2.3) before re-running."
               exit 1
             fi
 
