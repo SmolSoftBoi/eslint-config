@@ -9,8 +9,12 @@ Auto-generated from all feature plans. Last updated: 2025-12-23
 ## Project Structure
 
 ```text
-src/
-tests/
+.github/workflows/
+eslint.config.mjs
+index.mjs
+package.json
+yarn.lock
+README.md
 ```
 
 ## Commands
