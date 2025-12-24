@@ -62,5 +62,10 @@ if command -v git >/dev/null 2>&1; then
   echo "[yarn-install-immutable] Verifying yarn.lock did not change"
   git diff --exit-code yarn.lock
 else
-  annotate warning "git not found; skipping yarn.lock drift check"
+  if is_github_actions; then
+    annotate error "git not found in CI; failing yarn.lock drift check"
+    exit 1
+  else
+    annotate warning "git not found; skipping yarn.lock drift check"
+  fi
 fi
