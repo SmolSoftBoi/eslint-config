@@ -1,0 +1,117 @@
+name: Release
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      confirm_publish:
+        description: 'Set to true to publish to npm'
+        required: true
+        type: boolean
+        default: false
+
+concurrency:
+  group: release-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  checks:
+    name: Checks (lint + smoke)
+    runs-on: ubuntu-latest
+    env:
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate release tag and release notes
+        if: github.event_name == 'release'
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+        run: |
+          set -euo pipefail
+
+          TAG="$RELEASE_TAG"
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Release tag '$TAG' does not match semver policy (expected vMAJOR.MINOR.PATCH with optional prerelease, e.g. v1.2.3 or v1.2.3-rc.1)."
+            exit 1
+          fi
+
+          # Enforce human-readable release notes (non-empty, non-whitespace body).
+          if [ -z "$(printf '%s' "$RELEASE_BODY" | tr -d '[:space:]')" ]; then
+            echo "::error::Release notes are required (GitHub Release body is empty/whitespace)."
+            exit 1
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          registry-url: https://registry.npmjs.org/
+          cache: yarn
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies (immutable, with fallback)
+        run: bash ./scripts/yarn-install-immutable.sh
+
+      - name: Run ESLint
+        run: yarn eslint .
+
+      - name: Import smoke-test (packed consumer import)
+        run: bash ./scripts/smoke-import-packed.sh
+
+  publish:
+    name: Publish to npm
+    needs: checks
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' || inputs.confirm_publish
+    env:
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          registry-url: https://registry.npmjs.org/
+          cache: yarn
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies (immutable, with fallback)
+        run: bash ./scripts/yarn-install-immutable.sh
+
+      - name: Verify npm token is configured
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error::Missing npm credentials. Configure repository secret NPM_TOKEN to enable publishing."
+            exit 1
+          fi
+
+      - name: Determine npm access flag
+        run: |
+          NAME=$(node -p "require('./package.json').name")
+          if [[ "$NAME" == @*/* ]]; then
+            echo "NPM_ACCESS=--access public" >> "$GITHUB_ENV"
+          fi
+
+      - name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish ${NPM_ACCESS:-} --provenance
