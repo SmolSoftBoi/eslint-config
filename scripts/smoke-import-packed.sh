@@ -59,6 +59,18 @@ if ! TARBALL_FILE="$(npm pack --json | node "$ROOT_DIR/scripts/parse-npm-pack-fi
   annotate error "npm pack failed"
   exit 1
 fi
+
+if [[ -z "${TARBALL_FILE}" ]]; then
+  annotate error "Failed to parse npm pack output: empty tarball filename"
+  exit 1
+fi
+
+# Be conservative about the expected tarball filename format: a basename with safe
+# characters ending in .tgz, with no path separators.
+if ! [[ "${TARBALL_FILE}" =~ ^[A-Za-z0-9._-]+\.tgz$ ]]; then
+  annotate error "Unexpected tarball filename from npm pack: '${TARBALL_FILE}'"
+  exit 1
+fi
 TARBALL_PATH="$ROOT_DIR/$TARBALL_FILE"
 
 echo "[smoke-import-packed] Tarball: $TARBALL_PATH"
