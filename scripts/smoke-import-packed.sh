@@ -23,7 +23,7 @@ try {
 fi
 echo "[smoke-import-packed] Package: ${PKG_NAME}"
 
-tmp="$(mktemp -d)"
+tmp="$(mktemp -d -t smoke-import-packed.XXXXXX)"
 cleanup() {
   rm -rf "$tmp"
 }
