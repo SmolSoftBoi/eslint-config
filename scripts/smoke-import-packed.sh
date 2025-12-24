@@ -55,8 +55,12 @@ echo "[smoke-import-packed] Temp dir: $tmp"
 # (Yarn pack would also work, but npm pack is the closest representation of registry output.)
 
 echo "[smoke-import-packed] Packing..."
-if ! TARBALL_FILE="$(npm pack --json | node "$ROOT_DIR/scripts/parse-npm-pack-filename.mjs")"; then
+if ! PACK_OUTPUT="$(npm pack --json)"; then
   annotate error "npm pack failed"
+  exit 1
+fi
+if ! TARBALL_FILE="$(printf '%s\n' "$PACK_OUTPUT" | node "$ROOT_DIR/scripts/parse-npm-pack-filename.mjs")"; then
+  annotate error "Failed to parse npm pack output"
   exit 1
 fi
 
