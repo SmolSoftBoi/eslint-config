@@ -13,7 +13,11 @@ export default typescriptEslint.config(
   {
     files: ['scripts/**/*.mjs'],
     languageOptions: {
-      sourceType: 'module'
+      sourceType: 'module',
+      globals: {
+        console: 'readonly',
+        process: 'readonly'
+      }
     }
   },
   {
