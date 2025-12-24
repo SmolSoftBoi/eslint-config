@@ -27,7 +27,7 @@ jobs:
       matrix:
         node-version:
           - lts/*
-          - latest
+          - node
 
     steps:
       - name: Checkout
