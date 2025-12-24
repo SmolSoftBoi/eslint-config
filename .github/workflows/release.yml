@@ -130,7 +130,7 @@ jobs:
 
       - name: Determine npm access flag
         run: |
-          NAME=$(node -p "require('./package.json').name")
+          NAME=$(node --input-type=module -e "import { readFileSync } from 'node:fs'; console.log(JSON.parse(readFileSync('./package.json', 'utf8')).name);")
           if [[ "$NAME" == @*/* ]]; then
             echo "NPM_ACCESS=--access public" >> "$GITHUB_ENV"
           fi
