@@ -36,9 +36,18 @@ if yarn install --immutable 2>"$immutable_log"; then
   exit 0
 fi
 
-annotate warning "yarn install --immutable failed. Showing stderr (last 200 lines, or fewer) for debugging:"
+annotate warning "yarn install --immutable failed. Showing captured stderr (first and last 200 lines, or all if shorter) for debugging:"
 if [ -s "$immutable_log" ]; then
-  tail -n 200 "$immutable_log" || true
+  total_lines=$(wc -l < "$immutable_log" || echo 0)
+  if [ "$total_lines" -le 400 ]; then
+    cat "$immutable_log" || true
+  else
+    echo "[yarn-install-immutable] --- BEGIN stderr (first 200 lines) ---"
+    head -n 200 "$immutable_log" || true
+    echo "[yarn-install-immutable] --- ... truncated middle of stderr ... ---"
+    echo "[yarn-install-immutable] --- END stderr (last 200 lines) ---"
+    tail -n 200 "$immutable_log" || true
+  fi
 else
   echo "[yarn-install-immutable] No stderr captured."
 fi
