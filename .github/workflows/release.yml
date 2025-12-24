@@ -173,6 +173,8 @@ jobs:
           NAME=$(node --input-type=module -e "import { readFileSync } from 'node:fs'; console.log(JSON.parse(readFileSync('./package.json', 'utf8')).name);")
           if [[ "$NAME" == @*/* ]]; then
             echo "NPM_ACCESS=--access public" >> "$GITHUB_ENV"
+          else
+            echo "NPM_ACCESS=" >> "$GITHUB_ENV"
           fi
 
       - name: Publish
