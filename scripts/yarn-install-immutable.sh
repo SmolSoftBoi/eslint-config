@@ -60,7 +60,10 @@ yarn install
 # Guard against lockfile drift.
 if command -v git >/dev/null 2>&1; then
   echo "[yarn-install-immutable] Verifying yarn.lock did not change"
-  git diff --exit-code yarn.lock
+  if ! git diff --exit-code yarn.lock; then
+    annotate error "yarn.lock changed after fallback yarn install. Run 'yarn install' locally and commit the updated yarn.lock."
+    exit 1
+  fi
 else
   if is_github_actions; then
     annotate error "git not found in CI; failing yarn.lock drift check"
