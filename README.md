@@ -90,7 +90,7 @@ This repo uses **ShellCheck** to lint repository-tracked `*.sh` scripts.
 #### Run locally
 
 - This repo is pinned to Yarn via the `packageManager` field; if you see a Yarn version mismatch error, enable Corepack.
-- Install ShellCheck (https://www.shellcheck.net/) via your OS package manager.
+- Install ShellCheck (<https://www.shellcheck.net/>) via your OS package manager.
 - Run:
 
   - `yarn lint:shell`
