@@ -84,6 +84,7 @@ jobs:
         run: |
           set -euo pipefail
           echo 'Tracked shell scripts:'
+          # This invocation is for display/logging only; null-termination (-z) is only needed for the xargs call below.
           git ls-files -- '*.sh' '**/*.sh' ':(exclude).specify/scripts/**'
 
           if [ -z "$(git ls-files -- '*.sh' '**/*.sh' ':(exclude).specify/scripts/**')" ]; then
