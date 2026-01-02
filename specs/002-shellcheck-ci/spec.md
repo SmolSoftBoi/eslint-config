@@ -2,7 +2,7 @@
 
 **Feature Branch**: `002-shellcheck-ci`  
 **Created**: 2026-01-02  
-**Status**: Draft  
+**Status**: Approved  
 **Input**: User description: "Add ShellCheck to this repo to lint Bash/shell scripts (e.g., scripts/**/*.sh), ensure CI automation doesn’t introduce obvious shell bugs, provide a minimal repository config, optionally support a one-command local run, and document how to use it."
 
 ## Clarifications
@@ -59,22 +59,12 @@ As a contributor, I want an easy way to run the same shell lint check locally, s
 
 ### Edge Cases
 
-<!--
-  ACTION REQUIRED: The content in this section represents placeholders.
-  Fill them out with the right edge cases.
--->
-
-- Repository contains no tracked shell script files (job should still pass).
+- Repository contains no tracked `*.sh` files (job should still pass; avoid “no files” failures).
 - Shell scripts use different shells or shebangs (lint should apply consistent defaults and allow explicit overrides per file when required).
-- Files that are not intended to be linted (generated output, vendored content) should be excluded to avoid noisy failures.
+- Irrelevant paths (dependencies, generated output) must not be linted; prefer selecting tracked files (e.g., `git ls-files '*.sh'`) rather than scanning the filesystem.
 - GitHub Actions workflows contain `run:` blocks that are not shell (or are ambiguous); linting should be best-effort and avoid false failures when a shell cannot be confidently determined.
 
 ## Requirements *(mandatory)*
-
-<!--
-  ACTION REQUIRED: The content in this section represents placeholders.
-  Fill them out with the right functional requirements.
--->
 
 ### Functional Requirements
 
@@ -103,16 +93,11 @@ As a contributor, I want an easy way to run the same shell lint check locally, s
 
 ## Success Criteria *(mandatory)*
 
-<!--
-  ACTION REQUIRED: Define measurable success criteria.
-  These must be technology-agnostic and measurable.
--->
-
 ### Measurable Outcomes
 
 - **SC-001**: 100% of pull requests that change tracked shell script files receive a pass/fail lint signal as part of CI.
 - **SC-001a**: 100% of pull requests that change GitHub Actions workflow files receive a pass/fail lint signal for any `run:` blocks that can be linted.
 - **SC-002**: Contributors can follow documentation to run the lint check locally in one step and see a clear pass/fail result.
 - **SC-003**: Lint findings presented in CI are specific enough that a contributor can identify the failing file(s) and rule(s) without additional guidance.
-- **SC-004**: The lint job completes within 2 minutes for a typical pull request run when there are no lint findings.
+- **SC-004 (Target)**: The lint job should typically complete within 2 minutes for a clean pull request run; occasional variance is acceptable and is not, by itself, a merge blocker.
 - **SC-005**: A change that introduces a ShellCheck warning or error reliably fails CI; a change that introduces only info/style findings does not.

@@ -16,3 +16,14 @@
 ## Notes
 
 - CI also lints GitHub Actions workflow `run:` blocks (best-effort) to catch obvious shell bugs introduced in workflows.
+
+## If ShellCheck fails
+
+- Prefer fixing the underlying issue.
+- If a finding cannot be fixed (e.g., intentional behavior or a false positive), use a **narrow** inline suppression with a justification comment, for example:
+
+	- `# shellcheck disable=SC#### -- <why this is safe/intentional>`
+
+- Avoid globally disabling checks in `.shellcheckrc`.
+
+See `README.md` for contributor-facing guidance.

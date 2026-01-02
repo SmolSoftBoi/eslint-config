@@ -23,7 +23,7 @@ Add a ShellCheck quality gate that:
 **Testing**: CI smoke-test via `scripts/smoke-import-packed.sh`; lint via ESLint; no dedicated unit test framework  
 **Target Platform**: GitHub Actions (`ubuntu-latest`)  
 **Project Type**: Single package (shareable ESLint flat-config)  
-**Performance Goals**: Keep added CI lint step lightweight (target: <2 minutes on a typical PR when clean)  
+**Performance Goals**: Keep added CI lint step lightweight (target: typically <2 minutes on a clean PR; occasional variance is acceptable and not, by itself, a merge blocker)  
 **Constraints**: Minimal permissions; avoid new lockfiles or package-manager drift; avoid adding unnecessary dependencies  
 **Scale/Scope**: Lint a small number of repo scripts and workflow `run:` blocks
 
@@ -55,13 +55,6 @@ specs/002-shellcheck-ci/
 ```
 
 ### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
-
 ```text
 .
 ├── .github/workflows/
@@ -108,7 +101,7 @@ Update `.github/workflows/ci.yml`:
 - Steps (reusing existing style):
   1. Checkout
   2. Install ShellCheck via apt-get
-  3. Run ShellCheck on repository-tracked `*.sh` files (ensuring `scripts/**/*.sh` are included).
+  3. Run ShellCheck on repository-tracked `*.sh` files (ensuring `scripts/**/*.sh` are included). Prefer `git ls-files '*.sh'` to lint only tracked scripts and avoid scanning irrelevant paths (e.g., `node_modules/`, generated output).
   4. Run `actionlint` to lint workflow files and apply ShellCheck to `run:` scripts (best-effort detection, blocking when lintable and warnings/errors are found).
 
 Notes:
