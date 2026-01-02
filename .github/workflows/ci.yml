@@ -92,11 +92,11 @@ jobs:
           fi
 
           # Use -S warning to enforce the minimum severity threshold, as documented in .shellcheckrc.
-          git ls-files -z -- '*.sh' '**/*.sh' ':(exclude).specify/scripts/**' | xargs -0r shellcheck -S warning --rcfile .shellcheckrc
+          git ls-files -z -- '*.sh' '**/*.sh' ':(exclude).specify/scripts/**' | xargs -0r shellcheck -S warning
 
       - name: actionlint (with ShellCheck for workflow run blocks)
         uses: docker://rhysd/actionlint:1.7.7
         env:
-          SHELLCHECK_OPTS: '-S warning --rcfile .shellcheckrc'
+          SHELLCHECK_OPTS: '-S warning'
         with:
           args: -color -shellcheck=shellcheck

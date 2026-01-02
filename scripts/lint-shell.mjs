@@ -48,5 +48,5 @@ if (tracked.length === 0) {
 console.log('ShellCheck (tracked *.sh):');
 for (const file of tracked) console.log(`- ${file}`);
 
-const shellcheckArgs = ['-S', 'warning', '--rcfile', '.shellcheckrc', ...tracked];
+const shellcheckArgs = ['-S', 'warning', ...tracked];
 run('shellcheck', shellcheckArgs);
