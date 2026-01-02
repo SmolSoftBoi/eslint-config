@@ -3,6 +3,7 @@
 Auto-generated from all feature plans. Last updated: 2025-12-23
 
 ## Active Technologies
+- Node.js (ESM) + Bash scripts; CI on Ubuntu runners + Yarn (Corepack), ESLint flat config; no new runtime deps (002-shellcheck-ci)
 
 - Node.js (ESM package); CI targets Node 20 and Node 22 + ESLint 9 (flat config), TypeScript tooling, `typescript-eslint`, `eslint-plugin-import` (001-ci-publish-codeql)
 
@@ -26,6 +27,7 @@ README.md
 Node.js (ESM package); CI targets Node 20 and Node 22: Follow standard conventions
 
 ## Recent Changes
+- 002-shellcheck-ci: Added Node.js (ESM) + Bash scripts; CI on Ubuntu runners + Yarn (Corepack), ESLint flat config; no new runtime deps
 
 - 001-ci-publish-codeql: Added Node.js (ESM package); CI targets Node 20 and Node 22 + ESLint 9 (flat config), TypeScript tooling, `typescript-eslint`, `eslint-plugin-import`
 
