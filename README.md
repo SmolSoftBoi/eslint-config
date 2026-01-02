@@ -82,3 +82,18 @@ Contributions are what make the open source community such an amazing place to l
 3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
+
+## Releasing
+
+Publishing is **GitHub Release-driven**.
+
+### Prerequisites
+
+- Configure the repository secret `NPM_TOKEN` with an npm automation token that has publish rights for `@smolpack/eslint-config`.
+
+### Release flow
+
+1. Bump `package.json#version` and commit.
+2. Create a semver tag like `vX.Y.Z` (or prerelease `vX.Y.Z-rc.1`) pointing at that commit.
+3. Create a GitHub Release for that tag and include human-readable release notes.
+4. GitHub Actions runs `.github/workflows/release.yml` to validate and publish.

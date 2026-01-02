@@ -1,0 +1,199 @@
+name: Release
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      confirm_publish:
+        description: 'Set to true to publish to npm'
+        required: true
+        type: boolean
+        default: false
+      skip_validation:
+        description: 'Emergency override: set to true only if automated tag/version/release-notes validation is temporarily broken and you have manually verified all release details (use with extreme caution)'
+        required: true
+        type: boolean
+        default: false
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  checks:
+    name: Checks (lint + smoke)
+    runs-on: ubuntu-latest
+    env:
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate release tag and release notes
+        if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && !inputs.skip_validation)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # For release events, read tag/body from the event payload.
+          # For workflow_dispatch, require that the run is started on a semver tag ref
+          # and validate release notes by fetching the GitHub Release for that tag.
+          if [ "$GITHUB_EVENT_NAME" = "release" ]; then
+            TAG=$(node --input-type=module -e "import { readFileSync } from 'node:fs'; const e = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8')); console.log(e.release?.tag_name ?? '');")
+            RELEASE_BODY=$(node --input-type=module -e "import { readFileSync } from 'node:fs'; const e = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8')); console.log(e.release?.body ?? '');")
+          else
+            if [[ "${GITHUB_REF}" != refs/tags/* ]]; then
+              echo "::error::Manual publish must run on a semver tag ref (refs/tags/vMAJOR.MINOR.PATCH...). In GitHub, go to the Actions tab, open the 'Release' workflow, click 'Run workflow', and in the 'Use workflow from' selector choose the desired tag (e.g. v1.2.3) before re-running."
+              exit 1
+            fi
+
+            TAG="${GITHUB_REF#refs/tags/}"
+
+            # Fetch the corresponding GitHub Release so manual runs still enforce release notes.
+            API_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/${TAG}"
+            RESPONSE_FILE="release_response.json"
+            HTTP_STATUS=$(curl -sS -L \
+              -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              -H "Accept: application/vnd.github+json" \
+              -w "%{http_code}" \
+              -o "${RESPONSE_FILE}" \
+              "${API_URL}")
+
+            if [ "${HTTP_STATUS}" = "404" ]; then
+              echo "::error::No GitHub Release was found for tag '${TAG}'. For manual runs, create a release for this tag (or ensure you're using the correct tag) before publishing."
+              echo "GitHub API URL: ${API_URL}"
+              exit 1
+            elif [ "${HTTP_STATUS}" -lt 200 ] || [ "${HTTP_STATUS}" -ge 300 ]; then
+              echo "::error::Failed to fetch GitHub Release for tag '${TAG}'. HTTP status: ${HTTP_STATUS}"
+              echo "GitHub API URL: ${API_URL}"
+              echo "Response body:"
+              cat "${RESPONSE_FILE}" || true
+              exit 1
+            fi
+
+            RELEASE_BODY=$(node --input-type=module -e "import { readFileSync } from 'node:fs'; const r = JSON.parse(readFileSync(process.env.RESPONSE_FILE, 'utf8')); console.log(r.body ?? '');" RESPONSE_FILE="${RESPONSE_FILE}")
+          fi
+
+          if [ -z "${TAG}" ]; then
+            echo "::error::Unable to determine release tag for validation."
+            exit 1
+          fi
+
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$ ]]; then
+            echo "::error::Release tag '$TAG' does not match semver policy (expected vMAJOR.MINOR.PATCH with optional prerelease, e.g. v1.2.3 or v1.2.3-rc.1)."
+            exit 1
+          fi
+
+          # Enforce human-readable release notes (non-empty, non-whitespace body).
+          if [ -z "$(printf '%s' "$RELEASE_BODY" | tr -d '[:space:]')" ]; then
+            echo "::error::Release notes are required (GitHub Release body is empty/whitespace)."
+            exit 1
+          fi
+
+          # Verify package.json version matches release tag.
+          PKG_VERSION=$(node --input-type=module -e "import { readFileSync } from 'node:fs'; console.log(JSON.parse(readFileSync('./package.json', 'utf8')).version);")
+          TAG_VERSION="${TAG#v}"  # Strip leading 'v'
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::Version mismatch: package.json has $PKG_VERSION but release tag is $TAG (expected v$PKG_VERSION)."
+            exit 1
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          registry-url: https://registry.npmjs.org/
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Get Yarn cache directory
+        id: yarn-cache-dir
+        run: echo "dir=$(yarn config get cacheFolder)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Yarn
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.yarn-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-yarn-lts-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-lts-
+            ${{ runner.os }}-yarn-
+
+      - name: Install dependencies (immutable, with fallback)
+        run: bash ./scripts/yarn-install-immutable.sh
+
+      - name: Run ESLint
+        run: yarn eslint .
+
+      - name: Import smoke-test (packed consumer import)
+        run: bash ./scripts/smoke-import-packed.sh
+
+  publish:
+    name: Publish to npm
+    needs: checks
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.confirm_publish == true)
+    env:
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          registry-url: https://registry.npmjs.org/
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Get Yarn cache directory
+        id: yarn-cache-dir
+        run: echo "dir=$(yarn config get cacheFolder)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Yarn
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.yarn-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-yarn-lts-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-lts-
+            ${{ runner.os }}-yarn-
+
+      - name: Install dependencies (immutable, with fallback)
+        run: bash ./scripts/yarn-install-immutable.sh
+
+      - name: Verify npm token is configured
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error::Missing npm credentials. Configure repository secret NPM_TOKEN to enable publishing."
+            exit 1
+          fi
+
+      - name: Determine npm access flag
+        run: |
+          NAME=$(node --input-type=module -e "import { readFileSync } from 'node:fs'; console.log(JSON.parse(readFileSync('./package.json', 'utf8')).name);")
+          if [[ "$NAME" == @*/* ]]; then
+            echo "NPM_ACCESS=--access public" >> "$GITHUB_ENV"
+          else
+            echo "NPM_ACCESS=" >> "$GITHUB_ENV"
+          fi
+
+      - name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish ${NPM_ACCESS:-} --provenance
