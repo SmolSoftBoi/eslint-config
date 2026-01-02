@@ -83,6 +83,27 @@ Contributions are what make the open source community such an amazing place to l
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
+### ShellCheck (shell script linting)
+
+This repo uses **ShellCheck** to lint repository-tracked `*.sh` scripts.
+
+#### Run locally
+
+- This repo is pinned to Yarn via the `packageManager` field; if you see a Yarn version mismatch error, enable Corepack.
+- Install ShellCheck (<https://www.shellcheck.net/>) via your OS package manager.
+- Run:
+
+  - `yarn lint:shell`
+
+#### What to do when ShellCheck fails
+
+- Prefer fixing the underlying issue.
+- If you need to suppress a specific warning, use a **narrow** inline suppression with a justification comment, e.g.:
+
+  - `# shellcheck disable=SC#### -- <why this is safe/intentional>`
+
+- Avoid global disables in `.shellcheckrc`.
+
 ## Releasing
 
 Publishing is **GitHub Release-driven**.
