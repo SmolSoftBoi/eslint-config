@@ -1,0 +1,10 @@
+# ShellCheck configuration for this repository.
+# Keep this focused on correctness and low noise.
+
+# Note: ShellCheck's minimum severity is enforced by callers (CI and local scripts)
+# via `-S warning`, so this file can stay focused on repo-specific defaults.
+
+# Most scripts in this repo are bash
+shell=bash
+
+# Avoid global disables; prefer narrow inline suppressions with justification.

@@ -62,3 +62,46 @@ jobs:
 
       - name: Import smoke-test (packed consumer import)
         run: bash ./scripts/smoke-import-packed.sh
+
+  shellcheck:
+    name: ShellCheck (scripts + workflow run blocks)
+    runs-on: ubuntu-latest
+    # This workflow runs on pushes to any branch; keep this job limited to PRs and pushes to main.
+    if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/main' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+          shellcheck --version
+
+      - name: ShellCheck tracked *.sh files
+        run: |
+          echo 'Tracked shell scripts:'
+          git ls-files -- '*.sh' ':(exclude).specify/scripts/**' || true
+
+          if [ -z "$(git ls-files -- '*.sh' ':(exclude).specify/scripts/**')" ]; then
+            echo 'No tracked *.sh files; skipping.'
+            exit 0
+          fi
+
+          git ls-files -z -- '*.sh' ':(exclude).specify/scripts/**' | xargs -0r shellcheck -S warning --rcfile .shellcheckrc
+
+      - name: Install actionlint (pinned)
+        env:
+          ACTIONLINT_VERSION: '1.7.7'
+        run: |
+          curl -sSLo actionlint.tar.gz "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          tar -xzf actionlint.tar.gz actionlint
+          sudo install -m 0755 actionlint /usr/local/bin/actionlint
+          actionlint -version
+
+      - name: actionlint (with ShellCheck for workflow run blocks)
+        env:
+          SHELLCHECK_OPTS: '-S warning --rcfile .shellcheckrc'
+        run: |
+          actionlint -shellcheck

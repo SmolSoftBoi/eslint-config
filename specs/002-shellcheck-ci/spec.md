@@ -62,6 +62,7 @@ As a contributor, I want an easy way to run the same shell lint check locally, s
 - Repository contains no tracked `*.sh` files (job should still pass; avoid “no files” failures).
 - Shell scripts use different shells or shebangs (lint should apply consistent defaults and allow explicit overrides per file when required).
 - Irrelevant paths (dependencies, generated output) must not be linted; prefer selecting tracked files (e.g., `git ls-files '*.sh'`) rather than scanning the filesystem.
+- `.specify/scripts/**` is dependency tooling for the SpecKit workflow and is excluded from the ShellCheck gate.
 - GitHub Actions workflows contain `run:` blocks that are not shell (or are ambiguous); linting should be best-effort and avoid false failures when a shell cannot be confidently determined.
 
 ## Requirements *(mandatory)*
@@ -83,6 +84,7 @@ As a contributor, I want an easy way to run the same shell lint check locally, s
 
 - Contributors and CI runners have access to a standard ShellCheck runtime (directly or via a common CI-provided mechanism).
 - Only repository-owned shell scripts are in scope; third-party or generated scripts are excluded.
+- `.specify/scripts/**` is treated as dependency tooling and excluded from the ShellCheck lint target set.
 - The CI system supports adding an additional job/check that can fail the workflow on lint findings.
 - GitHub Actions workflows may include inline shell snippets in `run:` blocks that are desirable to lint.
 

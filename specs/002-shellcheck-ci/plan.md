@@ -88,7 +88,7 @@ specs/002-shellcheck-ci/
 
 - Add `.shellcheckrc` at repo root.
 - Keep it minimal and opinionated only about correctness:
-  - Set `severity=warning` (fail on warnings+errors, not info/style)
+  - Enforce minimum severity in CI/local runs with `-S warning` (fail on warnings+errors, not info/style)
   - Set `shell=bash` (current scripts use bash)
   - Avoid global `disable=` entries; if a rule must be suppressed, require an inline disable with a justification comment in the script.
 
@@ -101,7 +101,7 @@ Update `.github/workflows/ci.yml`:
 - Steps (reusing existing style):
   1. Checkout
   2. Install ShellCheck via apt-get
-  3. Run ShellCheck on repository-tracked `*.sh` files (ensuring `scripts/**/*.sh` are included). Prefer `git ls-files '*.sh'` to lint only tracked scripts and avoid scanning irrelevant paths (e.g., `node_modules/`, generated output).
+  3. Run ShellCheck on repository-tracked `*.sh` files (ensuring `scripts/**/*.sh` are included), excluding dependency tooling under `.specify/scripts/**`. Prefer `git ls-files` to lint only tracked scripts and avoid scanning irrelevant paths (e.g., `node_modules/`, generated output).
   4. Run `actionlint` to lint workflow files and apply ShellCheck to `run:` scripts (best-effort detection, blocking when lintable and warnings/errors are found).
 
 Notes:

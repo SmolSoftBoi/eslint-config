@@ -67,7 +67,7 @@
 
 **Decision**: Add a minimal `.shellcheckrc` in repo root with:
 
-- `severity=warning` to enforce the CI threshold
+- Minimum severity enforced in CI/local runs via `-S warning`
 - `shell=bash` since all current scripts are bash
 - No global excludes; allow per-line/per-file disables only with an explanatory comment
 
@@ -79,3 +79,22 @@
 **Alternatives considered**:
 
 - Disabling noisy rules globally (e.g. SC2086/SC2155): conflicts with the goal of catching obvious bugs.
+
+## Decision 6: Pin an actionlint version
+
+**Decision**: Pin `actionlint` to **v1.7.7** in CI.
+
+**Rationale**:
+
+- Keeps workflow linting behavior stable and reviewable (avoid supply-chain drift).
+- `actionlint` is only used in CI, so pinning avoids accidental changes in diagnostics.
+
+**How it’s installed in CI**:
+
+- Download the release artifact from GitHub Releases for the pinned version and install the binary on the runner.
+- Example (Linux x86_64):
+	- `https://github.com/rhysd/actionlint/releases/download/v1.7.7/actionlint_1.7.7_linux_amd64.tar.gz`
+
+**Alternatives considered**:
+
+- Use `rhysd/actionlint@v1` without pinning: simpler, but introduces drift.

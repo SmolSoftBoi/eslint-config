@@ -23,3 +23,18 @@ node_modules
 # Lockfile drift prevention (this repo uses Yarn)
 package-lock.json
 pnpm-lock.yaml
+
+# Build outputs / coverage
+dist/
+build/
+coverage/
+
+# Env files (never commit secrets)
+.env*
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+*.tmp

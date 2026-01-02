@@ -1,0 +1,15 @@
+# Dependencies / package manager internals
+node_modules/
+.pnp.*
+.yarn/
+
+# Build outputs / coverage
+dist/
+build/
+coverage/
+
+# Env files
+.env*
+
+# Logs
+*.log

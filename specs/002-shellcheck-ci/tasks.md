@@ -18,8 +18,8 @@ description: "Task list for feature implementation"
 
 **Purpose**: Confirm scope and establish shared configuration used by CI and local runs.
 
-- [ ] T001 Verify current shell script inventory and intended lint scope (tracked `*.sh`, `scripts/**/*.sh`, workflow `run:` blocks) and update `specs/002-shellcheck-ci/spec.md` if discrepancies are found
-- [ ] T002 Confirm the pinned `actionlint` version and document it in `specs/002-shellcheck-ci/research.md` (include rationale for the chosen pin)
+- [x] T001 Verify current shell script inventory and intended lint scope (tracked `*.sh`, `scripts/**/*.sh`, workflow `run:` blocks) and update `specs/002-shellcheck-ci/spec.md` if discrepancies are found
+- [x] T002 Confirm the pinned `actionlint` version and document it in `specs/002-shellcheck-ci/research.md` (include rationale for the chosen pin)
 
 ---
 
@@ -29,7 +29,7 @@ description: "Task list for feature implementation"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T003 [P] Create minimal ShellCheck config in `.shellcheckrc` (set `severity=warning`, set `shell=bash`, and avoid global `disable=`; require inline suppressions with justification)
+- [x] T003 [P] Create minimal ShellCheck config in `.shellcheckrc` (set `shell=bash`, enforce warnings+errors threshold via `-S warning` in CI/local runs, and avoid global `disable=`; require inline suppressions with justification)
 
 **Checkpoint**: `.shellcheckrc` exists and defines the project’s default lint baseline.
 
@@ -43,16 +43,16 @@ description: "Task list for feature implementation"
 
 ### Implementation for User Story 1
 
-- [ ] T004 [US1] Add a new `shellcheck` job skeleton to `.github/workflows/ci.yml` (ubuntu-latest, minimal permissions, consistent conventions)
-- [ ] T005 [US1] Ensure the `shellcheck` job runs only on `pull_request` and `push` to `main` (use job-level `if:` guard if keeping broader workflow triggers) in `.github/workflows/ci.yml`
-- [ ] T006 [US1] Install ShellCheck in CI via apt-get (no caching) in `.github/workflows/ci.yml`
-- [ ] T007 [US1] Lint repository-tracked `*.sh` files (including `scripts/**/*.sh`) with ShellCheck, failing on warnings/errors (ignore info/style) in `.github/workflows/ci.yml` (use `git ls-files '*.sh'` so we only lint tracked scripts and avoid irrelevant paths like `node_modules/` or generated output)
-- [ ] T008 [US1] Add pinned `actionlint` execution to lint workflow files and apply ShellCheck to `run:` blocks (best-effort extraction, blocking on warnings/errors when lintable) in `.github/workflows/ci.yml`
+- [x] T004 [US1] Add a new `shellcheck` job skeleton to `.github/workflows/ci.yml` (ubuntu-latest, minimal permissions, consistent conventions)
+- [x] T005 [US1] Ensure the `shellcheck` job runs only on `pull_request` and `push` to `main` (use job-level `if:` guard if keeping broader workflow triggers) in `.github/workflows/ci.yml`
+- [x] T006 [US1] Install ShellCheck in CI via apt-get (no caching) in `.github/workflows/ci.yml`
+- [x] T007 [US1] Lint repository-tracked `*.sh` files (including `scripts/**/*.sh`) with ShellCheck, failing on warnings/errors (ignore info/style) in `.github/workflows/ci.yml` (use `git ls-files '*.sh'` so we only lint tracked scripts and avoid irrelevant paths like `node_modules/` or generated output)
+- [x] T008 [US1] Add pinned `actionlint` execution to lint workflow files and apply ShellCheck to `run:` blocks (best-effort extraction, blocking on warnings/errors when lintable) in `.github/workflows/ci.yml`
 
 ### Remediation for existing scripts (only as needed to make the new gate pass)
 
-- [ ] T009 [P] [US1] Fix ShellCheck findings (or add narrow, justified suppressions) in `scripts/yarn-install-immutable.sh`
-- [ ] T010 [P] [US1] Fix ShellCheck findings (or add narrow, justified suppressions) in `scripts/smoke-import-packed.sh`
+- [x] T009 [P] [US1] Fix ShellCheck findings (or add narrow, justified suppressions) in `scripts/yarn-install-immutable.sh`
+- [x] T010 [P] [US1] Fix ShellCheck findings (or add narrow, justified suppressions) in `scripts/smoke-import-packed.sh`
 
 **Checkpoint**: CI shows a distinct `shellcheck` job that passes on clean PRs and fails on introduced warnings/errors.
 
@@ -66,10 +66,10 @@ description: "Task list for feature implementation"
 
 ### Implementation for User Story 2
 
-- [ ] T016 [US2] Add `lint:shell` script to `package.json` to run ShellCheck against repository-tracked `*.sh` files with the same severity threshold as CI
-- [ ] T017 [US2] (Optional) Add a `lint` script aggregator to `package.json` to include `lint:shell` alongside existing lint behavior (if any)
-- [ ] T018 [US2] Document local usage in `README.md` (prerequisite install note + command: `yarn lint:shell`)
-- [ ] T021 [US2] Expand `README.md` with “What to do when ShellCheck fails” guidance (fixing findings, when/how to use inline `# shellcheck disable=SC####` with a justification comment, and reference `.shellcheckrc`)
+- [x] T016 [US2] Add `lint:shell` script to `package.json` to run ShellCheck against repository-tracked `*.sh` files with the same severity threshold as CI
+- [x] T017 [US2] (Optional) Add a `lint` script aggregator to `package.json` to include `lint:shell` alongside existing lint behavior (if any)
+- [x] T018 [US2] Document local usage in `README.md` (prerequisite install note + command: `yarn lint:shell`)
+- [x] T021 [US2] Expand `README.md` with “What to do when ShellCheck fails” guidance (fixing findings, when/how to use inline `# shellcheck disable=SC####` with a justification comment, and reference `.shellcheckrc`)
 
 **Checkpoint**: A contributor can follow README and run the lint check locally.
 
@@ -79,8 +79,8 @@ description: "Task list for feature implementation"
 
 **Purpose**: Ensure docs and workflows are consistent and the feature is easy to maintain.
 
-- [ ] T022 [P] Update `specs/002-shellcheck-ci/quickstart.md` to include the exact local validation commands and expected exit behavior
-- [ ] T023 Ensure the CI `shellcheck` job output is actionable (clear file list, clear command output) by refining messages in `.github/workflows/ci.yml`
+- [x] T022 [P] Update `specs/002-shellcheck-ci/quickstart.md` to include the exact local validation commands and expected exit behavior
+- [x] T023 Ensure the CI `shellcheck` job output is actionable (clear file list, clear command output) by refining messages in `.github/workflows/ci.yml`
 
 ---
 
