@@ -15,7 +15,12 @@ function run(cmd, args, opts = {}) {
   if (res.error) {
     if (res.error.code === 'ENOENT') {
       // Friendly message when a required binary is missing.
-      console.error(`Missing required command: ${cmd}`);
+      const missing = typeof res.error.path === 'string' && res.error.path.length > 0 ? res.error.path : null;
+      if (missing && missing !== cmd) {
+        console.error(`Missing required command: ${cmd} (resolved as: ${missing})`);
+      } else {
+        console.error(`Missing required command: ${cmd}`);
+      }
       if (cmd === 'shellcheck') {
         console.error('Install ShellCheck (https://www.shellcheck.net/) and try again.');
       }
