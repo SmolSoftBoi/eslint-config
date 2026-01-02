@@ -6,7 +6,7 @@
   "main": "index.mjs",
   "scripts": {
     "lint:shell": "node ./scripts/lint-shell.mjs",
-    "lint": "yarn eslint . && yarn lint:shell"
+    "lint": "node ./scripts/lint.mjs"
   },
   "keywords": [
     "eslint",
