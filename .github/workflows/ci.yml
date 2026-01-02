@@ -67,7 +67,7 @@ jobs:
     name: ShellCheck (scripts + workflow run blocks)
     runs-on: ubuntu-latest
     # This workflow runs on pull requests and pushes to any branch; keep this job limited to PRs and pushes to main.
-    if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/main' }}
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout
