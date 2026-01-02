@@ -91,10 +91,11 @@
 
 **How it’s installed in CI**:
 
-- Download the release artifact from GitHub Releases for the pinned version and install the binary on the runner.
-- Example (Linux x86_64):
-	- `https://github.com/rhysd/actionlint/releases/download/v1.7.7/actionlint_1.7.7_linux_amd64.tar.gz`
+- Run actionlint via the official Docker-based GitHub Action, pinned to the same version:
+	- `uses: docker://rhysd/actionlint:1.7.7`
+
+This avoids a manual tarball download/install step and keeps the actionlint runtime (and its bundled dependencies in the image) consistent.
 
 **Alternatives considered**:
 
-- Use `rhysd/actionlint@v1` without pinning: simpler, but introduces drift.
+- Use `docker://rhysd/actionlint:latest` without pinning: simpler, but introduces drift.

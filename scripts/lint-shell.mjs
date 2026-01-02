@@ -35,7 +35,7 @@ function run(cmd, args, opts = {}) {
 // Treat `.specify/scripts/**` as dependency tooling (out of scope for lint gate).
 const list = run(
   'git',
-  ['ls-files', '-z', '--', '**/*.sh', ':(exclude).specify/scripts/**'],
+  ['ls-files', '-z', '--', '*.sh', '**/*.sh', ':(exclude).specify/scripts/**'],
   { stdio: ['ignore', 'pipe', 'inherit'] }
 );
 const tracked = list.stdout.split('\0').filter(Boolean);

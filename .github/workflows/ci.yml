@@ -84,29 +84,19 @@ jobs:
         run: |
           set -euo pipefail
           echo 'Tracked shell scripts:'
-          git ls-files -- '*.sh' ':(exclude).specify/scripts/**'
+          git ls-files -- '*.sh' '**/*.sh' ':(exclude).specify/scripts/**'
 
-          if [ -z "$(git ls-files -- '*.sh' ':(exclude).specify/scripts/**')" ]; then
+          if [ -z "$(git ls-files -- '*.sh' '**/*.sh' ':(exclude).specify/scripts/**')" ]; then
             echo 'No tracked *.sh files; skipping.'
             exit 0
           fi
 
           # Use -S warning to enforce the minimum severity threshold, as documented in .shellcheckrc.
-          git ls-files -z -- '*.sh' ':(exclude).specify/scripts/**' | xargs -0r shellcheck -S warning --rcfile .shellcheckrc
-
-      - name: Install actionlint (pinned)
-        env:
-          ACTIONLINT_VERSION: '1.7.7'
-        run: |
-          set -euo pipefail
-          curl -sSLo actionlint.tar.gz "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
-          tar -xzf actionlint.tar.gz actionlint
-          sudo install -m 0755 actionlint /usr/local/bin/actionlint
-          actionlint -version
+          git ls-files -z -- '*.sh' '**/*.sh' ':(exclude).specify/scripts/**' | xargs -0r shellcheck -S warning --rcfile .shellcheckrc
 
       - name: actionlint (with ShellCheck for workflow run blocks)
+        uses: docker://rhysd/actionlint:1.7.7
         env:
           SHELLCHECK_OPTS: '-S warning --rcfile .shellcheckrc'
-        run: |
-          set -euo pipefail
-          actionlint -shellcheck
+        with:
+          args: -color -shellcheck=shellcheck
