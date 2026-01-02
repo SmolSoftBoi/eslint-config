@@ -1,6 +1,11 @@
 import { spawnSync } from 'node:child_process';
 
 function run(cmd, args, opts = {}) {
+  // This helper is used in two modes:
+  // 1) "interactive" commands (default): stdio is inherited so output streams directly to the
+  //    terminal (e.g. running shellcheck). In this mode, res.stdout will be null.
+  // 2) "capture" commands: override stdio to pipe stdout so the caller can read res.stdout
+  //    (e.g. git ls-files). In this mode, encoding ensures res.stdout is a string.
   const res = spawnSync(cmd, args, {
     stdio: 'inherit',
     encoding: 'utf8',
@@ -33,6 +38,7 @@ function run(cmd, args, opts = {}) {
 
 // Only lint repository-tracked scripts to avoid scanning generated content.
 // Treat `.specify/scripts/**` as dependency tooling (out of scope for lint gate).
+// Capture stdout so we can parse the NUL-delimited file list.
 const list = run(
   'git',
   ['ls-files', '-z', '--', '*.sh', '**/*.sh', ':(exclude).specify/scripts/**'],
@@ -49,4 +55,5 @@ console.log('ShellCheck (tracked *.sh):');
 for (const file of tracked) console.log(`- ${file}`);
 
 const shellcheckArgs = ['-S', 'warning', ...tracked];
+// Inherit stdio so ShellCheck prints directly to the terminal.
 run('shellcheck', shellcheckArgs);
