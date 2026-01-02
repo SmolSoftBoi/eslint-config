@@ -25,7 +25,7 @@ function run(cmd, args, opts = {}) {
 
 // Only lint repository-tracked scripts to avoid scanning generated content.
 // Treat `.specify/scripts/**` as dependency tooling (out of scope for lint gate).
-const list = run('git', ['ls-files', '-z', '--', '**/*.sh', ':(exclude).specify/scripts/**']);
+const list = run('git', ['ls-files', '-z', '--', '*.sh', ':(exclude).specify/scripts/**']);
 const tracked = list.stdout.split('\0').filter(Boolean);
 
 if (tracked.length === 0) {
