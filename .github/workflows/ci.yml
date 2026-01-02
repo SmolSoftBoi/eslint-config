@@ -84,15 +84,15 @@ jobs:
         run: |
           set -euo pipefail
           echo 'Tracked shell scripts:'
-          git ls-files -- '**/*.sh' ':(exclude).specify/scripts/**'
+          git ls-files -- '*.sh' ':(exclude).specify/scripts/**'
 
-          if [ -z "$(git ls-files -- '**/*.sh' ':(exclude).specify/scripts/**')" ]; then
+          if [ -z "$(git ls-files -- '*.sh' ':(exclude).specify/scripts/**')" ]; then
             echo 'No tracked *.sh files; skipping.'
             exit 0
           fi
 
           # Use -S warning to enforce the minimum severity threshold, as documented in .shellcheckrc.
-          git ls-files -z -- '**/*.sh' ':(exclude).specify/scripts/**' | xargs -0r shellcheck -S warning --rcfile .shellcheckrc
+          git ls-files -z -- '*.sh' ':(exclude).specify/scripts/**' | xargs -0r shellcheck -S warning --rcfile .shellcheckrc
 
       - name: Install actionlint (pinned)
         env:
