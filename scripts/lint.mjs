@@ -6,15 +6,6 @@ function run(label, cmd, args) {
     windowsHide: true,
   });
 
-  child.on('error', (err) => {
-    // Surface missing binaries cleanly.
-    if (err && err.code === 'ENOENT') {
-      console.error(`[lint] Missing required command for ${label}: ${cmd}`);
-    } else {
-      console.error(`[lint] Failed to start ${label}:`, err);
-    }
-  });
-
   return child;
 }
 
@@ -26,21 +17,58 @@ const jobs = [
 
 let remaining = jobs.length;
 let failed = false;
+let exiting = false;
+const finished = new Set();
+
+function finalize(label, { code = 0, signal = null, error = null } = {}) {
+  if (finished.has(label)) return;
+  finished.add(label);
+
+  if (error) {
+    failed = true;
+    // Surface missing binaries cleanly.
+    if (error.code === 'ENOENT') {
+      console.error(`[lint] Missing required command for ${label}: ${error.path ?? '<unknown>'}`);
+    } else {
+      console.error(`[lint] Failed to start ${label}:`, error);
+    }
+  } else if (signal) {
+    failed = true;
+    console.error(`[lint] ${label} exited via signal ${signal}`);
+  } else if (code !== 0) {
+    failed = true;
+    console.error(`[lint] ${label} exited with code ${code}`);
+  }
+
+  remaining -= 1;
+
+  // If a process couldn't even start, don't hang around waiting—fail fast.
+  if (error && !exiting) {
+    exiting = true;
+    for (const j of jobs) {
+      if (j.label === label) continue;
+      try {
+        j.child.kill('SIGTERM');
+      } catch {
+        // ignore
+      }
+    }
+    process.exit(1);
+  }
+
+  if (remaining === 0) {
+    process.exit(failed ? 1 : 0);
+  }
+}
 
 for (const { label, child } of jobs) {
-  child.on('close', (code, signal) => {
-    if (signal) {
-      failed = true;
-      console.error(`[lint] ${label} exited via signal ${signal}`);
-    } else if (code !== 0) {
-      failed = true;
-      console.error(`[lint] ${label} exited with code ${code}`);
-    }
+  child.on('error', (err) => {
+    // When spawn fails, 'close' will never fire; treat this as completion.
+    finalize(label, { error: err, code: 1 });
+  });
 
-    remaining -= 1;
-    if (remaining === 0) {
-      process.exit(failed ? 1 : 0);
-    }
+  child.on('close', (code, signal) => {
+    finalize(label, { code, signal });
   });
 }
 
