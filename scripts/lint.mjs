@@ -42,7 +42,12 @@ function finalize(label, { code = 0, signal = null, error = null } = {}) {
 
   remaining -= 1;
 
-  // If a process couldn't even start, don't hang around waiting—fail fast.
+  // Design note:
+  // - Spawn/start failures (e.g. missing `yarn` / `node`) mean the overall lint run can't be trusted
+  //   to make progress, and the sibling process may keep running and waste time.
+  //   In that case we fail fast: stop the other jobs and exit non-zero immediately.
+  // - Normal non-zero exit codes are treated as *lint failures* (not infrastructure failures), so
+  //   we let both linters finish to show full diagnostics before exiting.
   if (error && !exiting) {
     exiting = true;
     for (const j of jobs) {
