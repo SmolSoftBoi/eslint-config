@@ -28,8 +28,9 @@ description: "Task list for pre-release preflight implementation"
 **Purpose**: Wiring required to run pre-release checks
 
 - [ ] T002 Update package scripts in package.json to add preflight, pack:check, smoke:import, and prerelease
-- [ ] T012 [P] Add conditional runner helpers in scripts/prerelease/utils.mjs to execute optional scripts (`lint:shell`, `typecheck`, `test`) only when package.json includes those scripts (skip if absent); mandatory `lint` script presence and failure-on-missing behavior are handled separately per FR-001a in spec.md
+- [ ] T012 [P] Add conditional runner helpers in scripts/prerelease/utils.mjs to execute optional scripts when present in package.json.
 
+**Notes**: Optional scripts include `lint:shell`, `typecheck`, and `test`. These should be skipped when absent from package.json. Mandatory `lint` script presence and failure-on-missing behavior are defined in FR-001a (see spec.md).
 
 **Checkpoint**: Pre-release commands are wired and can be invoked locally
 
@@ -42,10 +43,14 @@ description: "Task list for pre-release preflight implementation"
 **Independent Test**: Run `yarn prerelease` locally and confirm it runs linting, pack check, and import smoke tests, failing with actionable errors when a step breaks.
 
 ### Implementation for User Story 1
+- [ ] T003 [US1] Implement pack validation in scripts/prerelease/pack-check.mjs.
+- [ ] T004 [US1] Implement smoke import checks in scripts/prerelease/smoke-import.mjs.
+- [ ] T005 [US1] Ensure new scripts emit actionable error messages and clean up temp artifacts.
 
-- [ ] T003 [US1] Implement pack validation in scripts/prerelease/pack-check.mjs (npm pack --json, list contents, fail on missing required files/entrypoints)
-- [ ] T004 [US1] Implement smoke import checks in scripts/prerelease/smoke-import.mjs (workspace import + packed tarball import; allow local-only opt-out, but fail if skipped in CI)
-- [ ] T005 [US1] Ensure new scripts emit actionable error messages and clean up temp artifacts (scripts/prerelease/*.mjs)
+**Notes**:
+- T003: Use `npm pack --json` to list contents and fail on missing required files/entrypoints.
+- T004: Perform both workspace import and packed tarball import; allow a local-only opt-out, but fail if skipped in CI.
+- T005: Implement error messaging and temp artifact cleanup in `scripts/prerelease/*.mjs`.
 
 **Checkpoint**: `yarn prerelease` completes all checks or fails with clear diagnostics
 
