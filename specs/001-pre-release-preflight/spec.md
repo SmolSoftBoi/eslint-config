@@ -84,7 +84,7 @@ As a maintainer, I want brief documentation on the pre-release process so I know
 - **FR-003a**: Expected files and entry points MUST be derived from package.json fields (files, main, exports).
 - **FR-003b**: The release archive MUST contain `eslint.config.mjs`, `index.mjs`, `README.md`, and `LICENSE`.
 - **FR-003c**: Packed tarball import may be skipped only for local (non-CI) runs when `SKIP_PACKED_IMPORT=1` is set.
-- **FR-003d**: In CI, workflows MUST explicitly fail the job if `SKIP_PACKED_IMPORT=1` is set, and MUST always execute the packed tarball import step (no skipping based on this variable).
+- **FR-003d**: In CI, workflows MUST treat `SKIP_PACKED_IMPORT=1` as an error and fail the job, and MUST always execute the packed tarball import step (no skipping based on this variable).
 - **FR-004**: CI/release workflows MUST invoke the pre-release command before any publish step.
 - **FR-005**: Maintainer documentation MUST describe the pre-release command and when to use it.
 - **FR-006**: Formatting/linting steps MAY apply autofixes when running the pre-release command.
