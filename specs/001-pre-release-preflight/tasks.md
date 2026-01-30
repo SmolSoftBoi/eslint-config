@@ -21,6 +21,7 @@ description: "Task list for pre-release preflight implementation"
 - [ ] T014 [P] Implement actionable error formatting helpers in scripts/prerelease/utils.mjs, building on the baseline helpers from T001 (metadata reading and script discovery helpers)
 
 **Notes**: T013 and T014 extend the shared utilities from T001 by adding pack execution and error formatting helpers.
+
 ---
 
 ## Phase 2: Foundational (Blocking Prerequisites)
