@@ -29,7 +29,7 @@ description: "Task list for pre-release preflight implementation"
 
 - [ ] T002 Update package scripts in package.json to add preflight, pack:check, smoke:import, and prerelease
 - [ ] T012 [follow-up to T001/T013/T014; runs only after Phase 1 (T001/T013/T014) completes] Add conditional runner helpers in scripts/prerelease/utils.mjs to execute typecheck/test when package.json includes those scripts (skip if absent)
-- [ ] T012 [follow-up to T001/T013/T014] Add conditional runner helpers in scripts/prerelease/utils.mjs to execute typecheck/test when package.json includes those scripts (skip if absent)
+
 
 **Checkpoint**: Pre-release commands are wired and can be invoked locally
 
