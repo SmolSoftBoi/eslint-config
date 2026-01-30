@@ -77,7 +77,7 @@ As a maintainer, I want brief documentation on the pre-release process so I know
 
 - **FR-001**: The package scripts MUST include `preflight`, `pack:check`, `smoke:import`, and `prerelease` commands.
 - **FR-001a**: `preflight` MUST run the repository's `lint` script unconditionally; if `lint` is missing from package.json, the preflight MUST fail.
-- **FR-001d**: When `lint:shell`, `typecheck`, or `test` scripts are present in package.json, `preflight` MUST invoke each of them in this order: `lint:shell`, `typecheck`, `test`. If any of these scripts fail, preflight MUST fail immediately. When any of these scripts are absent, their corresponding steps MAY be skipped and MUST NOT cause the preflight to fail. This optionality is intentional to allow repositories that rely on other tooling or CI orchestration for these checks to pass without defining all of these scripts explicitly in `package.json`.
+- **FR-001d**: When `lint:shell`, `typecheck`, or `test` scripts are present in package.json, `preflight` MUST invoke each of them in this order: `lint:shell`, `typecheck`, `test`. If any of these scripts fail, preflight MUST fail immediately. When any of these scripts are absent, their corresponding steps MAY be skipped and MUST NOT cause the preflight to fail.
 - **FR-001b**: `prerelease` MUST run `preflight`, `pack:check`, and `smoke:import` in sequence.
 - **FR-002**: The pre-release command MUST fail the overall run if any step fails.
 - **FR-003**: The packaging smoke test MUST verify that the release archive contains the expected files and that published entry points import successfully.
@@ -97,6 +97,7 @@ As a maintainer, I want brief documentation on the pre-release process so I know
 ### Assumptions
 
 - If type checks or tests are not configured, the pre-release command will skip those steps without failing.
+- Optional script execution is intended to allow repositories that rely on other tooling or CI orchestration for these checks to pass without defining all of these scripts explicitly in `package.json`.
 - Formatting/linting is already defined by existing scripts and can be invoked as part of the pre-release command.
 
 ## Success Criteria *(mandatory)*
