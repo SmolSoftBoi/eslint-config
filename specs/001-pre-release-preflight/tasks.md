@@ -28,7 +28,7 @@ description: "Task list for pre-release preflight implementation"
 **Purpose**: Wiring required to run pre-release checks
 
 - [ ] T002 Update package scripts in package.json to add preflight, pack:check, smoke:import, and prerelease
-- [ ] T012 [P] Add conditional runner helpers in scripts/prerelease/utils.mjs to execute typecheck/test when package.json includes those scripts (skip if absent)
+- [ ] T012 [P] Add conditional runner helpers in scripts/prerelease/utils.mjs to execute optional scripts (`lint:shell`, `typecheck`, `test`) only when package.json includes those scripts (skip if absent); mandatory `lint` script presence and failure-on-missing behavior are handled separately per FR-001a in spec.md
 
 
 **Checkpoint**: Pre-release commands are wired and can be invoked locally
