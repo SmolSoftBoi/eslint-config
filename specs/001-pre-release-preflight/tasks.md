@@ -16,10 +16,11 @@ description: "Task list for pre-release preflight implementation"
 
 **Purpose**: Shared utilities needed by multiple scripts
 
-- [ ] T001 Create shared pre-release utilities module in scripts/prerelease/utils.mjs with baseline package.json parsing and script discovery helpers (pack execution and error formatting helpers implemented in T013/T014)
+- [ ] T001 Create shared pre-release utilities module in scripts/prerelease/utils.mjs with baseline package.json parsing and script discovery helpers
 - [ ] T013 [P] Implement npm pack execution helpers in scripts/prerelease/utils.mjs using the extension points defined in T001
 - [ ] T014 [P] Implement actionable error formatting helpers in scripts/prerelease/utils.mjs using the extension points defined in T001
 
+**Notes**: T013 and T014 extend the shared utilities from T001 by adding pack execution and error formatting helpers.
 ---
 
 ## Phase 2: Foundational (Blocking Prerequisites)
@@ -27,7 +28,7 @@ description: "Task list for pre-release preflight implementation"
 **Purpose**: Wiring required to run pre-release checks
 
 - [ ] T002 Update package scripts in package.json to add preflight, pack:check, smoke:import, and prerelease
-- [ ] T002a [optional] Add a prepublishOnly hook in package.json that runs prerelease when present
+- [ ] T012 [follow-up to T001/T013/T014; runs only after Phase 1 (T001/T013/T014) completes] Add conditional runner helpers in scripts/prerelease/utils.mjs to execute typecheck/test when package.json includes those scripts (skip if absent)
 - [ ] T012 [follow-up to T001/T013/T014] Add conditional runner helpers in scripts/prerelease/utils.mjs to execute typecheck/test when package.json includes those scripts (skip if absent)
 
 **Checkpoint**: Pre-release commands are wired and can be invoked locally
