@@ -57,8 +57,7 @@ description: "Task list for pre-release preflight implementation"
 **Independent Test**: Trigger CI and Release workflows and confirm `yarn prerelease` runs and blocks publish on failure.
 
 ### Implementation for User Story 2
-- [ ] T006 [US2] Update CI workflow to run yarn prerelease, ensuring it replaces or consolidates any existing direct lint/smoke steps if present, in .github/workflows/ci.yml
-- [ ] T006 [US2] Update CI workflow to run yarn prerelease (replace direct lint/smoke steps) in .github/workflows/ci.yml
+- [ ] T006 [US2] Update CI workflow to run yarn prerelease, replacing or consolidating any existing direct lint/smoke steps, in .github/workflows/ci.yml
 - [ ] T007 [US2] Update Release workflow to run yarn prerelease before publish in .github/workflows/release.yml
 - [ ] T010 [US2] Confirm CI matrix includes lts/* and node while Release remains lts/* only in .github/workflows/ci.yml and .github/workflows/release.yml
 
