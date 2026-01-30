@@ -16,7 +16,7 @@ description: "Task list for pre-release preflight implementation"
 
 **Purpose**: Shared utilities needed by multiple scripts
 
-- [ ] T001 Create shared prerelease utilities in scripts/prerelease/utils.mjs (package.json parsing, npm pack execution, actionable error formatting)
+- [ ] T001 Create shared pre-release utilities in scripts/prerelease/utils.mjs (package.json parsing, npm pack execution, actionable error formatting)
 
 ---
 
@@ -25,7 +25,7 @@ description: "Task list for pre-release preflight implementation"
 **Purpose**: Wiring required to run pre-release checks
 
 - [ ] T002 Update package scripts in package.json to add preflight, pack:check, smoke:import, prerelease, and optional prepublishOnly
-- [ ] T012 [follow-up to T001] Extend shared prerelease utilities in scripts/prerelease/utils.mjs to conditionally run typecheck/test when package.json includes those scripts (skip if absent)
+- [ ] T012 [follow-up to T001] Extend shared pre-release utilities in scripts/prerelease/utils.mjs to conditionally run typecheck/test when package.json includes those scripts (skip if absent)
 
 **Checkpoint**: Pre-release commands are wired and can be invoked locally
 
@@ -93,14 +93,14 @@ description: "Task list for pre-release preflight implementation"
 - **Setup (Phase 1)**: No dependencies
 - **Foundational (Phase 2)**: Depends on Setup
 - **User Story 1 (Phase 3)**: Depends on Foundational
-- **User Story 2 (Phase 4)**: Depends on Foundational and User Story 1 (prerelease scripts must be fully implemented and functional)
+- **User Story 2 (Phase 4)**: Depends on Foundational and User Story 1 (pre-release scripts must be fully implemented and functional)
 - **User Story 3 (Phase 5)**: Depends on Foundational (scripts must be documented)
 - **Polish (Phase 6)**: Depends on all user stories
 
 ### User Story Dependencies
 
 - **US1 (P1)**: Can start after Foundational
-- **US2 (P2)**: Depends on US1 (prerelease scripts fully implemented and functional)
+- **US2 (P2)**: Depends on US1 (pre-release scripts fully implemented and functional)
 - **US3 (P3)**: Can start after Foundational
 
 ### Parallel Opportunities
