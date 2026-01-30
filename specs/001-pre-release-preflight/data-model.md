@@ -33,7 +33,7 @@ Minimum set of files that must exist in the release archive.
 
 ## Validation Rules
 
-- `missingRequiredFiles` must be empty for a successful pack check (only the RequiredFiles list is enforced).
+- `missingRequiredFiles` must be empty for a successful pack check; this enforces the RequiredFiles list. Declared entrypoints are enforced by the rules below.
 - The file list from `npm pack --json` is the authoritative packaged set; RequiredFiles and declared entrypoints are validated against this list.
 - Declared entrypoints are mandatory: their absence is always a validation failure.
 - `entrypoints` must resolve to paths present in the package file list when applicable.
