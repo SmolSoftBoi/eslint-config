@@ -1,4 +1,6 @@
 import { spawn } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { URL, fileURLToPath } from 'node:url';
 
 function run(label, cmd, args) {
   const child = spawn(cmd, args, {
@@ -9,9 +11,17 @@ function run(label, cmd, args) {
   return child;
 }
 
+const eslintBinPath = fileURLToPath(new URL('../node_modules/eslint/bin/eslint.js', import.meta.url));
+const eslintCmd = process.execPath;
+const eslintArgs = existsSync(eslintBinPath)
+  ? [eslintBinPath, '.']
+  : null;
+
 // Run both linters concurrently without relying on shell operators like `&&` or `&`.
 const jobs = [
-  { label: 'eslint', cmd: 'yarn', args: ['eslint', '.'] },
+  eslintArgs
+    ? { label: 'eslint', cmd: eslintCmd, args: eslintArgs }
+    : { label: 'eslint', cmd: 'node', args: ['-e', "console.error('[lint] Missing required command for eslint: eslint'); process.exit(1)"] },
   { label: 'shellcheck', cmd: 'node', args: ['./scripts/lint-shell.mjs'] },
 ].map(({ label, cmd, args }) => ({ label, child: run(label, cmd, args) }));
 
