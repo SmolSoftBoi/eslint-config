@@ -1,9 +1,10 @@
-# eslint-config Development Guidelines
+﻿# eslint-config Development Guidelines
 
 Auto-generated from all feature plans. Last updated: 2025-12-23
 
 ## Active Technologies
 - Node.js (ESM) + Bash scripts; CI on Ubuntu runners + Yarn (Corepack), ESLint flat config; no new runtime deps (002-shellcheck-ci)
+- Node.js (ESM), JavaScript + Yarn 4, ESLint, Prettier, TypeScript (dev) (001-pre-release-preflight)
 
 - Node.js (ESM package); CI targets Node 20 and Node 22 + ESLint 9 (flat config), TypeScript tooling, `typescript-eslint`, `eslint-plugin-import` (001-ci-publish-codeql)
 
@@ -27,9 +28,9 @@ README.md
 Node.js (ESM package); CI targets Node 20 and Node 22: Follow standard conventions
 
 ## Recent Changes
+- 001-pre-release-preflight: Added Node.js (ESM), JavaScript + Yarn 4, ESLint, Prettier, TypeScript (dev)
 - 002-shellcheck-ci: Added Node.js (ESM) + Bash scripts; CI on Ubuntu runners + Yarn (Corepack), ESLint flat config; no new runtime deps
 
-- 001-ci-publish-codeql: Added Node.js (ESM package); CI targets Node 20 and Node 22 + ESLint 9 (flat config), TypeScript tooling, `typescript-eslint`, `eslint-plugin-import`
 
 <!-- MANUAL ADDITIONS START -->
 ## Notes for this repo
