@@ -16,7 +16,9 @@ description: "Task list for pre-release preflight implementation"
 
 **Purpose**: Shared utilities needed by multiple scripts
 
-- [ ] T001 Create shared pre-release utilities in scripts/prerelease/utils.mjs (package.json parsing, npm pack execution, actionable error formatting)
+- [ ] T001 Create shared pre-release utilities in scripts/prerelease/utils.mjs for package.json parsing
+- [ ] T013 [P] Add npm pack execution helpers in scripts/prerelease/utils.mjs
+- [ ] T014 [P] Add actionable error formatting helpers in scripts/prerelease/utils.mjs
 
 ---
 
