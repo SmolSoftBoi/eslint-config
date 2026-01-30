@@ -77,14 +77,14 @@ As a maintainer, I want brief documentation on the pre-release process so I know
 
 - **FR-001**: The package scripts MUST include `preflight`, `pack:check`, `smoke:import`, and `prerelease` commands.
 - **FR-001a**: `preflight` MUST run the repository's `lint` script unconditionally; if `lint` is missing from package.json, the preflight MUST fail.
-- **FR-001d**: When `lint:shell`, `typecheck`, or `test` scripts are present in package.json, `preflight` MUST invoke each of them in this order: `lint:shell`, `typecheck`, `test`. If any of these scripts fail, preflight MUST fail immediately. When any of these scripts are absent, their corresponding steps MAY be skipped and MUST NOT cause the preflight to fail.
+- **FR-001d**: When `lint:shell`, `typecheck`, or `test` scripts are present in package.json, `preflight` MUST invoke each of them in this order: `lint:shell`, `typecheck`, `test`. `preflight` MUST always attempt to run all of the present scripts in this sequence, even if an earlier script fails, and MUST treat the overall run as failed if any of these scripts fail. When any of these scripts are absent, their corresponding steps MUST be skipped and MUST NOT cause the preflight to fail.
 - **FR-001b**: `prerelease` MUST run `preflight`, `pack:check`, and `smoke:import` in sequence.
 - **FR-002**: The pre-release command MUST fail the overall run if any step fails.
 - **FR-003**: The packaging smoke test MUST verify that the release archive contains the expected files and that published entry points import successfully.
 - **FR-003a**: Expected files and entry points MUST be derived from package.json fields (files, main, exports).
 - **FR-003b**: The release archive MUST contain `eslint.config.mjs`, `index.mjs`, `README.md`, and `LICENSE`.
 - **FR-003c**: Packed tarball import may be skipped only for local (non-CI) runs when `SKIP_PACKED_IMPORT=1` is set.
-- **FR-003d**: When running in CI, workflows and the `prerelease` command MUST ignore `SKIP_PACKED_IMPORT` and MUST always execute the packed tarball import step; `SKIP_PACKED_IMPORT` MUST NOT be used in CI to alter or skip this check.
+- **FR-003d**: In CI, workflows MUST explicitly fail the job if `SKIP_PACKED_IMPORT=1` is set, and MUST always execute the packed tarball import step (no skipping based on this variable).
 - **FR-004**: CI/release workflows MUST invoke the pre-release command before any publish step.
 - **FR-005**: Maintainer documentation MUST describe the pre-release command and when to use it.
 - **FR-006**: Formatting/linting steps MAY apply autofixes when running the pre-release command.
