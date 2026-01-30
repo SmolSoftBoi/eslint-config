@@ -83,7 +83,7 @@ As a maintainer, I want brief documentation on the pre-release process so I know
 - **FR-003**: The packaging smoke test MUST verify that the release archive contains the expected files and that published entry points import successfully.
 - **FR-003a**: Expected files and entry points MUST be derived from package.json fields (files, main, exports).
 - **FR-003b**: The release archive MUST contain `eslint.config.mjs`, `index.mjs`, `README.md`, and `LICENSE`.
-- **FR-003c**: Packed tarball import may be skipped only when `SKIP_PACKED_IMPORT=1` is set locally; CI must fail if this variable is set.
+- **FR-003c**: Packed tarball import may be skipped only for local (non-CI) runs when `SKIP_PACKED_IMPORT=1` is set; CI workflows MUST explicitly check for this variable and fail if it is set, and MUST NOT skip the packed tarball import based on it.
 - **FR-004**: CI/release workflows MUST invoke the pre-release command before any publish step.
 - **FR-005**: Maintainer documentation MUST describe the pre-release command and when to use it.
 - **FR-006**: Formatting/linting steps MAY apply autofixes when running the pre-release command.

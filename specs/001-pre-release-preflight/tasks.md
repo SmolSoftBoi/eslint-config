@@ -26,7 +26,8 @@ description: "Task list for pre-release preflight implementation"
 
 **Purpose**: Wiring required to run pre-release checks
 
-- [ ] T002 Update package scripts in package.json to add preflight, pack:check, smoke:import, prerelease, and optionally add a prepublishOnly hook (which must run prerelease if added)
+- [ ] T002 Update package scripts in package.json to add preflight, pack:check, smoke:import, and prerelease
+- [ ] T002a [optional] Add a prepublishOnly hook in package.json that runs prerelease when present
 - [ ] T012 [follow-up to T001] Extend shared pre-release utilities in scripts/prerelease/utils.mjs to conditionally run typecheck/test when package.json includes those scripts (skip if absent)
 
 **Checkpoint**: Pre-release commands are wired and can be invoked locally
@@ -56,7 +57,7 @@ description: "Task list for pre-release preflight implementation"
 **Independent Test**: Trigger CI and Release workflows and confirm `yarn prerelease` runs and blocks publish on failure.
 
 ### Implementation for User Story 2
-
+- [ ] T006 [US2] Update CI workflow to run yarn prerelease, ensuring it replaces or consolidates any existing direct lint/smoke steps if present, in .github/workflows/ci.yml
 - [ ] T006 [US2] Update CI workflow to run yarn prerelease (replace direct lint/smoke steps) in .github/workflows/ci.yml
 - [ ] T007 [US2] Update Release workflow to run yarn prerelease before publish in .github/workflows/release.yml
 - [ ] T010 [US2] Confirm CI matrix includes lts/* and node while Release remains lts/* only in .github/workflows/ci.yml and .github/workflows/release.yml

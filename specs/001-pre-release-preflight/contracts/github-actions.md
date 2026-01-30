@@ -17,7 +17,7 @@ This document describes required workflow behavior for pre-release validation.
 ### Required Steps
 - Install dependencies via Yarn (immutable install behavior preserved).
 - Run pre-release validation via `yarn prerelease`.
-- Validate on both current Node LTS and current Node.
+- Validate on both the latest Node LTS release and the latest stable Node release.
 
 ## Release Workflow (`.github/workflows/release.yml`)
 
