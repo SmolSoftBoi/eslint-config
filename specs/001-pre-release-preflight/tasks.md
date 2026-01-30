@@ -32,7 +32,7 @@ description: "Task list for pre-release preflight implementation"
 - [ ] T012 Add conditional runner helpers in scripts/prerelease/utils.mjs to execute optional scripts when present in package.json.
 - [ ] T015 Implement preflight command runner in scripts/prerelease/preflight.mjs (validate that the mandatory base `lint` script exists, invoke optional scripts via T012 helpers, use utils helpers)
 
-**Notes**: T012 only introduces conditional runner helpers for optional scripts such as `lint:shell`, `typecheck`, and `test`. Per the "MUST be skipped" clause in FR-001d, these helpers skip scripts that are absent in package.json while still honoring FR-001d's fail-fast behavior for optional scripts that exist and fail. T015 validates the mandatory base `lint` script (FR-001a) and uses T012 helpers to run optional scripts.
+**Notes**: T012 only introduces conditional runner helpers for optional scripts such as `lint:shell`, `typecheck`, and `test`. Per the "MUST be skipped" clause in requirement FR-001d in `spec.md` (which defines the optional script execution behavior), these helpers skip scripts that are absent in package.json while still honoring FR-001d's fail-fast behavior for optional scripts that exist and fail. T015 validates the mandatory base `lint` script (FR-001a, also defined in `spec.md`) and uses T012 helpers to run optional scripts.
 
 **Checkpoint**: Pre-release commands are wired and can be invoked locally
 
