@@ -25,7 +25,7 @@ description: "Task list for pre-release preflight implementation"
 **Purpose**: Wiring required to run pre-release checks
 
 - [ ] T002 Update package scripts in package.json to add preflight, pack:check, smoke:import, prerelease, and optional prepublishOnly
-- [ ] T012 Update preflight logic in scripts/prerelease/utils.mjs to conditionally run typecheck/test when package.json includes those scripts (skip if absent)
+- [ ] T012 Extend shared prerelease utilities in scripts/prerelease/utils.mjs to conditionally run typecheck/test when package.json includes those scripts (skip if absent)
 
 **Checkpoint**: Pre-release commands are wired and can be invoked locally
 
@@ -107,7 +107,7 @@ description: "Task list for pre-release preflight implementation"
 
 - T003 and T004 can be implemented in parallel after T001/T002
 - T006 and T007 can be implemented in parallel after US1
-- T008 can be done in parallel with US2 after T002
+- T008 can be done in parallel with US2 after Phase 2
 
 ---
 

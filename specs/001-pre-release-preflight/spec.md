@@ -76,7 +76,7 @@ As a maintainer, I want brief documentation on the pre-release process so I know
 ### Functional Requirements
 
 - **FR-001**: The package scripts MUST include `preflight`, `pack:check`, `smoke:import`, and `prerelease` commands.
-- **FR-001a**: `preflight` MUST run all repository quality checks (at minimum `yarn eslint .` plus any existing checks).
+- **FR-001a**: `preflight` MUST run all repository quality checks (at minimum the repository's primary lint command—e.g., a full-project ESLint run via the existing lint script—plus any existing checks).
 - **FR-001b**: `prerelease` MUST run `preflight`, `pack:check`, and `smoke:import` in sequence.
 - **FR-001c**: Type checks and tests MUST be detected by the presence of `typecheck` and `test` scripts in package.json; if absent, they are skipped without failing.
 - **FR-002**: The pre-release command MUST fail the overall run if any step fails.
