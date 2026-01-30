@@ -26,7 +26,7 @@ description: "Task list for pre-release preflight implementation"
 
 **Purpose**: Wiring required to run pre-release checks
 
-- [ ] T002 Update package scripts in package.json to add preflight, pack:check, smoke:import, prerelease, and optional prepublishOnly
+- [ ] T002 Update package scripts in package.json to add preflight, pack:check, smoke:import, prerelease, and optionally add a prepublishOnly hook (which must run prerelease if added)
 - [ ] T012 [follow-up to T001] Extend shared pre-release utilities in scripts/prerelease/utils.mjs to conditionally run typecheck/test when package.json includes those scripts (skip if absent)
 
 **Checkpoint**: Pre-release commands are wired and can be invoked locally
@@ -73,7 +73,7 @@ description: "Task list for pre-release preflight implementation"
 
 ### Implementation for User Story 3
 
-- [ ] T008 [US3] Add a maintainer note for prerelease validation in README.md (Releasing section)
+- [ ] T008 [US3] Add a maintainer note for prerelease validation in README.md (Releasing or equivalent section)
 
 **Checkpoint**: Maintainers can follow the documented prerelease flow
 

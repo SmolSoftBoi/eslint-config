@@ -33,6 +33,7 @@ Minimum set of files that must exist in the release archive.
 
 ## Validation Rules
 
-- `missingRequiredFiles` must be empty for a successful pack check.
+- `missingRequiredFiles` must be empty for a successful pack check (only the RequiredFiles list is enforced).
+- Files listed by `npm pack --json` are treated as informational; absence of any non-required file does not fail the check unless it is a declared entrypoint.
 - `entrypoints` must resolve to paths present in the package file list when applicable.
 - `importCheckPassed` must be true for successful smoke import.
