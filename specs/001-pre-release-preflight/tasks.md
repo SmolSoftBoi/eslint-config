@@ -93,14 +93,14 @@ description: "Task list for pre-release preflight implementation"
 - **Setup (Phase 1)**: No dependencies
 - **Foundational (Phase 2)**: Depends on Setup
 - **User Story 1 (Phase 3)**: Depends on Foundational
-- **User Story 2 (Phase 4)**: Depends on Foundational and User Story 1 (scripts must exist)
+- **User Story 2 (Phase 4)**: Depends on Foundational and User Story 1 (prerelease scripts must be fully implemented and functional)
 - **User Story 3 (Phase 5)**: Depends on Foundational (scripts must be documented)
 - **Polish (Phase 6)**: Depends on all user stories
 
 ### User Story Dependencies
 
 - **US1 (P1)**: Can start after Foundational
-- **US2 (P2)**: Depends on US1 for script availability
+- **US2 (P2)**: Depends on US1 (prerelease scripts fully implemented and functional)
 - **US3 (P3)**: Can start after Foundational
 
 ### Parallel Opportunities
