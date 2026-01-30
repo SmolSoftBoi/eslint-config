@@ -30,7 +30,7 @@ description: "Task list for pre-release preflight implementation"
 - [ ] T002 Update package scripts in package.json to add preflight, pack:check, smoke:import, and prerelease
 - [ ] T012 [P] Add conditional runner helpers in scripts/prerelease/utils.mjs to execute optional scripts when present in package.json.
 
-**Notes**: Optional scripts include `lint:shell`, `typecheck`, and `test`. These should be skipped when absent from package.json. Mandatory `lint` script presence and failure-on-missing behavior are defined in FR-001a and FR-001d (see spec.md), with FR-001d specifying the conditional execution behavior for optional scripts.
+**Notes**: Optional scripts include `lint:shell`, `typecheck`, and `test`. These should be skipped when absent from package.json. Mandatory `lint` script behavior is defined in FR-001a, while FR-001d defines conditional execution (skip-if-absent) for the optional `lint:shell`, `typecheck`, and `test` scripts (see spec.md).
 
 **Checkpoint**: Pre-release commands are wired and can be invoked locally
 
