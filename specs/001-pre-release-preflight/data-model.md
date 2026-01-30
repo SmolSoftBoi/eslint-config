@@ -33,8 +33,8 @@ Minimum set of files that must exist in the release archive.
 
 ## Validation Rules
 
-- `missingRequiredFiles` must be empty for a successful pack check; this enforces the RequiredFiles list. Entrypoint enforcement is handled by the "Declared entrypoints are mandatory" and "`entrypoints` must resolve to paths present in the package file list when applicable" rules below.
+- `missingRequiredFiles` must be empty for a successful pack check; this enforces the RequiredFiles list. Entrypoint enforcement is handled by the "Declared entrypoints are mandatory" and "When `exports` or `main` fields are defined in `package.json`, all resulting `entrypoints` must resolve to paths present in the package file list" rules below.
 - The file list from `npm pack --json` is the authoritative packaged set; RequiredFiles and declared entrypoints are validated against this list.
 - Declared entrypoints are mandatory: for each declared entrypoint, the corresponding file **must** be present in the package file list; a missing entrypoint file is always a validation failure.
-- `entrypoints` must resolve to paths present in the package file list when applicable.
+- When `exports` or `main` fields are defined in `package.json`, all resulting `entrypoints` must resolve to paths present in the package file list.
 - `importCheckPassed` must be true for successful smoke import.
