@@ -36,7 +36,7 @@ description: "Task list for pre-release preflight implementation"
 - [ ] T017 Add or verify prepublishOnly script behavior; if added, ensure it runs the prerelease script (document decision if omitted)
 
 **Notes**:
-- T012 adds conditional runner helpers for optional scripts such as `lint:shell`, `typecheck`, and `test`.
+- T012 adds conditional runner helpers to execute optional scripts when present (e.g., `lint:shell`, `typecheck`, `test`).
 - Per requirements FR-001d-i through FR-001d-iii in `spec.md`, these helpers:
   - skip optional scripts that are missing from `package.json`, and
   - fail fast when an optional script exists but exits with an error.
