@@ -83,6 +83,12 @@ Contributions are what make the open source community such an amazing place to l
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
+### Local validation
+
+- `yarn preflight` runs linting, type checks (when `tsconfig.json` exists), tests (placeholder when not configured), and the packaging smoke test.
+- `yarn prerelease` is an alias for `yarn preflight` to keep release automation consistent.
+- `yarn smoke:pack` builds the package with `yarn pack`, verifies the entry point is included, and imports the packed artifact.
+
 ### ShellCheck (shell script linting)
 
 This repo uses **ShellCheck** to lint repository-tracked `*.sh` scripts.
