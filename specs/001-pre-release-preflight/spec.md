@@ -15,7 +15,7 @@
 - Q: Should formatting/linting checks be check-only or allow autofix? → A: Allow autofix formatting/linting.
 - Q: Which publish command is used? → A: `npm publish`.
 - Q: Should a `prepublishOnly` hook be used? → A: Optional; if added, it must run `prerelease`.
-- Q: Which Node versions should the smoke test validate? → A: Validate both current Node LTS and current.
+- Q: Which Node versions should the smoke test validate? → A: Validate both the current Node LTS release and the latest stable Node version.
 - Q: Which files must be guaranteed in the release archive? → A: `eslint.config.mjs`, `index.mjs`, `README.md`, `LICENSE`.
 - Q: What is the local opt-out mechanism for packed tarball import? → A: Set `SKIP_PACKED_IMPORT=1` locally; CI must fail if this is set.
 

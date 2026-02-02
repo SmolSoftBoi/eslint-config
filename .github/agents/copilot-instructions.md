@@ -19,7 +19,6 @@ yarn.lock
 README.md
 ```
 
-## Commands
 
 ## Code Style
 

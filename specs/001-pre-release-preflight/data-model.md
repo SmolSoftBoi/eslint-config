@@ -33,11 +33,17 @@ Minimum set of files that must exist in the release archive.
 
 ## Validation Rules
 
-- `missingRequiredFiles` must be empty for a successful pack check; this enforces the RequiredFiles list. Entrypoint enforcement is handled by the "Declared entrypoints are mandatory" rule below.
-- The file list from `npm pack --json` is the authoritative packaged set **only when the command completes successfully and the JSON output is parsed without error**; RequiredFiles and declared entrypoints are validated against this list.
-- If `npm pack --json` fails (non-zero exit code), the pack check **must treat this as an error condition**, surface a clear failure, and skip/abort validations that depend on the authoritative file list rather than defaulting to an empty or partial list.
-- If `npm pack --json` produces no output, the pack check **must treat this as an error condition**, surface a clear failure, and skip/abort validations that depend on the authoritative file list rather than defaulting to an empty or partial list.
-- If `npm pack --json` returns malformed/unexpected JSON that cannot be parsed into a file list, the pack check **must treat this as an error condition**, surface a clear failure, and skip/abort validations that depend on the authoritative file list rather than defaulting to an empty or partial list.
+- **Pack file list authority & error handling**
+  - The file list from `npm pack --json` is considered the authoritative packaged set **only if all of the following are true**:
+    - the command completes successfully (zero exit code)
+    - the command produces non-empty JSON output
+    - the JSON output can be parsed into the expected file list structure
+  - When **any** of these conditions is not met:
+    - the pack check **must treat this as an error condition**
+    - it must surface a clear failure explaining the cause (exit status, missing output, or parse error)
+    - it must skip or abort validations that depend on the authoritative file list, rather than defaulting to an empty or partial list
+  - When an authoritative file list is available:
+    - `missingRequiredFiles` must be empty for a successful pack check; this enforces the RequiredFiles list. Entrypoint enforcement is handled by the "Declared entrypoints are mandatory" rule below.
 - Declared entrypoints are mandatory: when `exports` or `main` fields are defined in `package.json`, all resulting `entrypoints` must resolve to paths present in the package file list.
 - For each declared entrypoint, the corresponding file **must** be present in the package file list.
 - A missing entrypoint file is always a validation failure.
