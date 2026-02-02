@@ -43,7 +43,7 @@ Minimum set of files that must exist in the release archive.
     - it must surface a clear failure explaining the cause (exit status, missing output, or parse error)
     - it must skip or abort validations that depend on the authoritative file list, rather than defaulting to an empty or partial list
   - When an authoritative file list is available:
-    - `missingRequiredFiles` must be empty for a successful pack check; this enforces the RequiredFiles list. Entrypoint enforcement is handled by the "Declared entrypoints are mandatory" rule below.
+    - `missingRequiredFiles` must be empty for a successful pack check; this enforces the RequiredFiles list. Entrypoint enforcement is handled by the `Declared entrypoints are mandatory` rule below.
 - Declared entrypoints are mandatory: when `exports` or `main` fields are defined in `package.json`, all resulting `entrypoints` must resolve to paths present in the package file list.
 - For each declared entrypoint, the corresponding file **must** be present in the package file list.
 - A missing entrypoint file is always a validation failure.

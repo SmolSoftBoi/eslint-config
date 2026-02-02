@@ -19,7 +19,7 @@ description: "Task list for pre-release preflight implementation"
 - [ ] T001 Create shared pre-release utilities module in scripts/prerelease/utils.mjs with helpers for reading package.json
 - [ ] T019 Extract package metadata helpers (name, main, exports, files) in scripts/prerelease/utils.mjs, building on T001
 - [ ] T016 [P] Add script discovery helpers for reading scripts defined in package.json
-- [ ] T013 [P] Implement npm pack execution helpers in scripts/prerelease/utils.mjs, building on the baseline helpers from T001 and T016 (metadata reading and script discovery helpers)
+- [ ] T013 [P] Implement npm pack execution helpers in scripts/prerelease/utils.mjs
 - [ ] T014 [P] Implement actionable error formatting helpers in scripts/prerelease/utils.mjs, building on the baseline helpers from T001 and T016 (metadata reading and script discovery helpers)
 
 **Notes**: T013 and T014 extend the shared utilities from T001 and T016 by adding pack execution and error formatting helpers.
