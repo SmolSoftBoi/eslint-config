@@ -88,8 +88,8 @@ As a maintainer, I want brief documentation on the pre-release process so I know
 - **FR-003**: The packaging smoke test MUST verify that the release archive contains the expected files and that published entry points import successfully.
 - **FR-003a**: Expected files and entry points MUST be derived from package.json fields (files, main, exports).
 - **FR-003b**: The release archive MUST contain `eslint.config.mjs`, `index.mjs`, `README.md`, and `LICENSE`.
-- **FR-003c**: For local (non-CI) runs, tools MAY skip the packed tarball import step only when the `SKIP_PACKED_IMPORT` environment variable is set to the string value `"1"` or `"true"`; for any other string value (including `"0"`, `"false"`, or the empty string), the packed tarball import step MUST be executed.
-- **FR-003d**: In CI, workflows MUST treat `SKIP_PACKED_IMPORT` set to the string value `"1"` as an error and fail the job, and MUST always execute the packed tarball import step (no skipping based on this variable).
+- **FR-003c**: For local (non-CI) runs, tools MAY skip the packed tarball import step when the `SKIP_PACKED_IMPORT` environment variable is set to any non-empty value; when it is unset or empty, the packed tarball import step MUST be executed.
+- **FR-003d**: In CI, workflows MUST treat `SKIP_PACKED_IMPORT` set to any non-empty value as an error and fail the job, and MUST always execute the packed tarball import step (no skipping based on this variable).
 - **FR-004**: CI/release workflows MUST invoke the pre-release command before any publish step.
 - **FR-005**: Maintainer documentation MUST describe the pre-release command and when to use it.
 - **FR-006**: Formatting/linting steps MAY apply autofixes when running the pre-release command.
