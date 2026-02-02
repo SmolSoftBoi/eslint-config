@@ -21,7 +21,7 @@ README.md
 
 ## Commands
 
-Command references are maintained in the Manual Additions section below (install, lint, release/publish).
+Command references are maintained in the Manual Additions section below under "Common commands" (install, lint) and the release/publish expectations note.
 
 
 ## Code Style
