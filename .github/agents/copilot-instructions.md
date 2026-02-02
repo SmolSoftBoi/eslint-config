@@ -47,10 +47,12 @@ yarn.lock
 README.md
 ```
 
-Common commands:
+### Common commands
 
 - Install (deterministic): `corepack enable && yarn install --immutable`
 - Lint: `yarn eslint .`
 
-Release/publish expectations (per spec `001-ci-publish-codeql`): GitHub Release-driven publishing for semver tags `vX.Y.Z` (including prereleases like `vX.Y.Z-rc.1`), with npm provenance enabled.
+### Release/publish expectations
+
+GitHub Release-driven publishing for semver tags `vX.Y.Z` (including prereleases like `vX.Y.Z-rc.1`), with npm provenance enabled (per spec `001-ci-publish-codeql`).
 <!-- MANUAL ADDITIONS END -->
