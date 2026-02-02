@@ -21,8 +21,6 @@ README.md
 
 ## Commands
 
-# Add commands for Node.js (ESM package); CI targets Node 20 and Node 22
-
 ## Code Style
 
 Node.js (ESM package); CI targets Node 20 and Node 22: Follow standard conventions
