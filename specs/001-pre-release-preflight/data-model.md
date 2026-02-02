@@ -44,8 +44,8 @@ Minimum set of files that must exist in the release archive.
     - it MUST skip or abort validations that depend on the authoritative file list, rather than defaulting to an empty or partial list
   - When an authoritative file list is available:
     - `missingRequiredFiles` MUST be empty for a successful pack check.
-      Entrypoint enforcement is handled by the entrypoint validation rule below.
-- Declared entrypoints are mandatory:
+    - Entrypoint enforcement is handled by the entrypoint validation rule below.
+ - Declared entrypoints are mandatory:
   - When `exports` or `main` fields are defined in `package.json`, all resulting `entrypoints` MUST resolve to paths that are present in the package file list.
   - For an `exports` object, the validator MUST traverse the full conditional exports tree and treat every leaf string target as an entrypoint, including nested condition combinations (for example, `exports['.'].import`, `exports['.'].node`, and `exports['.'].node.import`).
   - This requirement applies to all conditional branches (such as `import`, `require`, `default`, `node`, `browser`, etc.), regardless of nesting depth.
