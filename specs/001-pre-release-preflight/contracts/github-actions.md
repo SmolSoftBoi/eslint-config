@@ -6,7 +6,7 @@ This document describes required workflow behavior for pre-release validation.
 
 ### Triggers
 - `pull_request`
-- `push` (any branch; ignore version tag pushes)
+- `push` (any branch; do not trigger on tag pushes)
 
 ### Concurrency
 - One active run per ref; in-progress runs canceled on new commits.

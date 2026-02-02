@@ -39,12 +39,12 @@ Minimum set of files that must exist in the release archive.
     - the command produces non-empty JSON output
     - the JSON output can be parsed into the expected file list structure
   - When **any** of these conditions is not met:
-    - the pack check **must treat this as an error condition**
-    - it must surface a clear failure explaining the cause (exit status, missing output, or parse error)
-    - it must skip or abort validations that depend on the authoritative file list, rather than defaulting to an empty or partial list
+    - the pack check **MUST treat this as an error condition**
+    - it MUST surface a clear failure explaining the cause (exit status, missing output, or parse error)
+    - it MUST skip or abort validations that depend on the authoritative file list, rather than defaulting to an empty or partial list
   - When an authoritative file list is available:
     - `missingRequiredFiles` MUST be empty for a successful pack check. This enforces the RequiredFiles list. Entrypoint enforcement is handled by the entrypoint validation rule below.
-- Declared entrypoints are mandatory: when `exports` or `main` fields are defined in `package.json`, all resulting `entrypoints` must resolve to paths present in the package file list.
-- For each declared entrypoint, the corresponding file **must** be present in the package file list.
+- Declared entrypoints are mandatory: when `exports` or `main` fields are defined in `package.json`, all resulting `entrypoints` MUST resolve to paths present in the package file list.
+- For each declared entrypoint, the corresponding file **MUST** be present in the package file list.
 - A missing entrypoint file is always a validation failure.
 - `importCheckPassed` must be true for successful smoke import.
