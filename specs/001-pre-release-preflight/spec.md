@@ -78,7 +78,8 @@ As a maintainer, I want brief documentation on the pre-release process so I know
 - **FR-001**: The package scripts MUST include `preflight`, `pack:check`, `smoke:import`, and `prerelease` commands.
 - **FR-001a**: `preflight` MUST run the repository's `lint` script unconditionally; if `lint` is missing from package.json, the preflight MUST fail.
 - **FR-001d-i**: When `lint:shell`, `typecheck`, or `test` scripts are present in package.json, `preflight` MUST invoke each of them in this order: `lint:shell`, `typecheck`, `test`.
-- **FR-001d-ii**: If any of these scripts fail, `preflight` MUST fail immediately and skip remaining optional scripts; this ends the `preflight` command and causes `prerelease` to fail without running `pack:check` or `smoke:import`.
+- **FR-001d-ii**: If any of these scripts fail, `preflight` MUST fail immediately and skip remaining optional scripts.
+- *Note (non-normative)*: Because **FR-001b** requires `prerelease` to run `preflight`, `pack:check`, and `smoke:import` in sequence, any `preflight` failure will cause `prerelease` to fail before running `pack:check` or `smoke:import`.
 - **FR-001d-iii**: When any of these scripts are absent, their corresponding steps MUST be skipped and MUST NOT cause the preflight to fail.
 - **FR-001b**: `prerelease` MUST run `preflight`, `pack:check`, and `smoke:import` in sequence.
 - **FR-002**: The pre-release command MUST fail the overall run if any step fails.
