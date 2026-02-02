@@ -45,6 +45,9 @@ Minimum set of files that must exist in the release archive.
   - When an authoritative file list is available:
     - `missingRequiredFiles` MUST be empty for a successful pack check.
     - Entrypoint enforcement is handled by the entrypoint validation rule below.
+  - **Example**:
+    - Successful pack check: `npm pack --json` exits 0 and returns a non-empty JSON array of files that can be parsed.
+    - Failed pack check: `npm pack --json` exits non-zero, returns empty output, or returns malformed JSON; the pre-release preflight fails and dependent validations are skipped.
 - Declared entrypoints are mandatory:
   - When `exports` or `main` fields are defined in `package.json`, all resulting `entrypoints` MUST resolve to paths that are present in the package file list.
   - If the authoritative file list is unavailable, entrypoint validation MUST be skipped because the pack check has already failed (per the pack file list authority rule).

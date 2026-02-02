@@ -30,8 +30,8 @@ Command references are maintained in the Manual Additions section below under th
 Node.js (ESM package); CI targets Node 20 and Node 22: Follow standard conventions
 
 ## Recent Changes
-- 001-pre-release-preflight: Added Node.js (ESM), JavaScript + Yarn 4, ESLint, Prettier, TypeScript (dev)
-- 002-shellcheck-ci: Added Node.js (ESM) + Bash scripts; CI on Ubuntu runners + Yarn (Corepack), ESLint flat config; no new runtime deps
+- 001-pre-release-preflight: Added pre-release scripts, packaging checks, and CI/release enforcement workflow updates.
+- 002-shellcheck-ci: Added shellcheck CI workflow integration.
 
 
 <!-- MANUAL ADDITIONS START -->
