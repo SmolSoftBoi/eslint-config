@@ -19,6 +19,10 @@ yarn.lock
 README.md
 ```
 
+## Commands
+
+Command references are maintained in the Manual Additions section below.
+
 
 ## Code Style
 
