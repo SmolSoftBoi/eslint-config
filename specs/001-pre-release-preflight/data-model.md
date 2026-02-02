@@ -49,5 +49,11 @@ Minimum set of files that must exist in the release archive.
   - When `exports` or `main` fields are defined in `package.json`, all resulting `entrypoints` MUST resolve to paths that are present in the package file list.
   - For an `exports` object, the validator MUST traverse the full conditional exports tree and treat every leaf string target as an entrypoint, including nested condition combinations (for example, `exports['.'].import`, `exports['.'].node`, and `exports['.'].node.import`).
   - This requirement applies to all conditional branches (such as `import`, `require`, `default`, `node`, `browser`, etc.), regardless of nesting depth.
+  - **Traversal pseudocode** (normative):
+    - `collectEntrypoints(value)`
+      - if `value` is a string: add it to entrypoints
+      - else if `value` is an array: for each element, call `collectEntrypoints(element)`
+      - else if `value` is an object: for each property value, call `collectEntrypoints(propertyValue)`
+      - else: ignore (non-string leaves are not entrypoints)
 - A missing entrypoint file is always a validation failure.
 - `importCheckPassed` must be true for successful smoke import.
