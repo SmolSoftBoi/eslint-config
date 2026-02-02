@@ -43,7 +43,7 @@ Minimum set of files that must exist in the release archive.
     - it MUST fail the pre-release preflight by exiting the process with a non-zero status code and writing a clear error message to stderr explaining the cause (non-zero pack exit status, missing output, or parse error)
     - it MUST skip or abort validations that depend on the authoritative file list, rather than defaulting to an empty or partial list
   - When an authoritative file list is available:
-    - `missingRequiredFiles` MUST be empty for a successful pack check. This enforces the RequiredFiles list.
+    - `missingRequiredFiles` MUST be empty for a successful pack check.
       Entrypoint enforcement is handled by the entrypoint validation rule below.
 - Declared entrypoints are mandatory:
   - When `exports` or `main` fields are defined in `package.json`, all resulting `entrypoints` MUST resolve to paths that are present in the package file list.
