@@ -31,7 +31,7 @@ description: "Task list for pre-release preflight implementation"
 **Purpose**: Wiring required to run pre-release checks
 
 - [ ] T002 Update package scripts in package.json to add `preflight`, `pack:check`, `smoke:import`, and `prerelease`
-- [ ] T012 Add conditional runner helpers in scripts/prerelease/utils.mjs to execute optional scripts in the specified order when present in package.json (`lint:shell`, `typecheck`, `test`); T015 invokes these helpers after validating and running the mandatory `lint` script.
+- [ ] T012 Add conditional runner helpers in scripts/prerelease/utils.mjs to execute optional scripts in the specified order when present in package.json (`lint:shell`, `typecheck`, `test`); T015 will invoke these helpers after validating and running the mandatory `lint` script.
 - [ ] T015 Implement preflight command runner in scripts/prerelease/preflight.mjs (validate that the mandatory base `lint` script exists, invoke optional scripts via T012 helpers, use utils helpers; per FR-001d-ii, FR-001d-iii, FR-001d-iv in spec.md)
 - [ ] T017 Add or verify `prepublishOnly` script behavior; if added, ensure it runs the `prerelease` script (document decision if omitted)
 
@@ -73,7 +73,7 @@ description: "Task list for pre-release preflight implementation"
 **Independent Test**: Trigger CI and Release workflows and confirm `yarn prerelease` runs and blocks publish on failure.
 
 ### Implementation for User Story 2
-- [ ] T006 [US2] Update CI workflow to run yarn prerelease, replacing or consolidating any existing direct lint/smoke steps, in .github/workflows/ci.yml
+- [ ] T006 [US2] Update CI workflow to run yarn prerelease in .github/workflows/ci.yml
 - [ ] T007 [US2] Update Release workflow to run yarn prerelease before publish in .github/workflows/release.yml
 - [ ] T010 [US2] Confirm CI matrix includes lts/* and node while Release remains lts/* only in .github/workflows/ci.yml and .github/workflows/release.yml
 
