@@ -39,7 +39,8 @@ Minimum set of files that must exist in the release archive.
     - the command produces non-empty JSON output
     - the JSON output can be parsed into the expected file list structure
   - When **any** of these conditions is not met, the pack check **MUST** perform all of the following:
-    - fail the pre-release preflight by exiting the process with a non-zero status code and writing a clear error message to stderr explaining the cause (non-zero pack exit status, missing output, or parse error)
+    - fail the pre-release preflight by exiting the process with a non-zero status code
+    - write a clear error message to stderr explaining the cause (non-zero pack exit status, missing output, or parse error)
     - skip or abort validations that depend on the authoritative file list, rather than defaulting to an empty or partial list
   - When an authoritative file list is available:
     - `missingRequiredFiles` MUST be empty for a successful pack check.
