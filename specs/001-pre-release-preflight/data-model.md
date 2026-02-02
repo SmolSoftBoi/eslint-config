@@ -38,10 +38,9 @@ Minimum set of files that must exist in the release archive.
     - the command completes successfully (zero exit code)
     - the command produces non-empty JSON output
     - the JSON output can be parsed into the expected file list structure
-  - When **any** of these conditions is not met:
-    - the pack check **MUST treat this as an error condition**
-    - it MUST fail the pre-release preflight by exiting the process with a non-zero status code and writing a clear error message to stderr explaining the cause (non-zero pack exit status, missing output, or parse error)
-    - it MUST skip or abort validations that depend on the authoritative file list, rather than defaulting to an empty or partial list
+  - When **any** of these conditions is not met, the pack check **MUST** perform all of the following:
+    - fail the pre-release preflight by exiting the process with a non-zero status code and writing a clear error message to stderr explaining the cause (non-zero pack exit status, missing output, or parse error)
+    - skip or abort validations that depend on the authoritative file list, rather than defaulting to an empty or partial list
   - When an authoritative file list is available:
     - `missingRequiredFiles` MUST be empty for a successful pack check.
     - Entrypoint enforcement is handled by the entrypoint validation rule below.
@@ -50,6 +49,8 @@ Minimum set of files that must exist in the release archive.
   - For an `exports` object, the validator MUST traverse the full conditional exports tree and treat every leaf string target as an entrypoint, including nested condition combinations (for example, `exports['.'].import`, `exports['.'].node`, and `exports['.'].node.import`).
   - This requirement applies to all conditional branches (such as `import`, `require`, `default`, `node`, `browser`, etc.), regardless of nesting depth.
   - **Traversal pseudocode** (normative):
+    - Initialize an empty set `entrypoints` and call `collectEntrypoints(exportsValue)`.
+    - Return `entrypoints` after traversal completes.
     - `collectEntrypoints(value)`
       - if `value` is a string: add it to entrypoints
       - else if `value` is an array: for each element, call `collectEntrypoints(element)`
