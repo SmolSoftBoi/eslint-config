@@ -37,7 +37,7 @@ description: "Task list for pre-release preflight implementation"
 
 **Notes**:
 - T012 adds conditional runner helpers for optional scripts such as `lint:shell`, `typecheck`, and `test`.
-- Per requirement FR-001d in `spec.md`, these helpers:
+- Per requirements FR-001d-i through FR-001d-iii in `spec.md`, these helpers:
   - skip optional scripts that are missing from `package.json`, and
   - fail fast when an optional script exists but exits with an error.
 - T015 validates the mandatory base `lint` script (FR-001a in `spec.md`) and uses the T012 helpers to run optional scripts.
