@@ -22,20 +22,39 @@ annotate() {
 
 ROOT_DIR="$(pwd)"
 
-if ! PKG_NAME="$(node --input-type=module -e "import { readFileSync } from 'node:fs';
+if ! PKG_META="$(node --input-type=module <<'NODE'
+import { readFileSync } from 'node:fs';
+
 try {
   const pkg = JSON.parse(readFileSync('./package.json', 'utf8'));
   if (!pkg?.name || typeof pkg.name !== 'string') {
-    throw new Error('package.json is missing a valid \"name\" field');
+    throw new Error('package.json is missing a valid "name" field');
   }
-  console.log(pkg.name);
+  const name = pkg.name;
+  let entry = 'index.mjs';
+  if (typeof pkg.exports === 'string') {
+    entry = pkg.exports;
+  } else if (
+    pkg.exports &&
+    typeof pkg.exports === 'object' &&
+    typeof pkg.exports['.'] === 'string'
+  ) {
+    entry = pkg.exports['.'];
+  } else if (typeof pkg.main === 'string') {
+    entry = pkg.main;
+  }
+  console.log(`${name}\n${entry}`);
 } catch (e) {
   console.error('Failed to read package name from package.json:', e?.message ?? e);
   process.exit(1);
-}")"; then
+}
+NODE
+)"; then
   annotate error "Failed to read package name from package.json"
   exit 1
 fi
+
+IFS=$'\n' read -r PKG_NAME PKG_ENTRY <<< "$PKG_META"
 
 if [[ -z "${PKG_NAME:-}" ]]; then
   annotate error "Package name is empty after reading package.json"
@@ -43,56 +62,58 @@ if [[ -z "${PKG_NAME:-}" ]]; then
 fi
 echo "[smoke-import-packed] Package: ${PKG_NAME}"
 
-if ! tmp="$(mktemp -d -t smoke-import-packed.XXXXXX)"; then
+PKG_ENTRY="${PKG_ENTRY:-index.mjs}"
+ENTRY_RELATIVE="${PKG_ENTRY#./}"
+if [[ -z "${ENTRY_RELATIVE:-}" ]]; then
+  annotate error "Package entry point is empty after reading package.json"
+  exit 1
+fi
+echo "[smoke-import-packed] Entry: ${ENTRY_RELATIVE}"
+
+if ! PACK_DIR="$(mktemp -d -t smoke-pack-artifact.XXXXXX)"; then
+  annotate error "Failed to create temporary directory for pack artifact"
+  exit 1
+fi
+
+if ! CONSUMER_DIR="$(mktemp -d -t smoke-import-packed.XXXXXX)"; then
   annotate error "Failed to create temporary directory for smoke-import-packed test"
   exit 1
 fi
 
-if [ ! -d "$tmp" ]; then
-  annotate error "Temporary path is not a directory: $tmp"
+if [ ! -d "$CONSUMER_DIR" ]; then
+  annotate error "Temporary path is not a directory: $CONSUMER_DIR"
   exit 1
 fi
 
-if ! chmod 700 "$tmp"; then
-  annotate error "Failed to set permissions on temporary directory: $tmp"
+if ! chmod 700 "$CONSUMER_DIR"; then
+  annotate error "Failed to set permissions on temporary directory: $CONSUMER_DIR"
   exit 1
 fi
 cleanup() {
-  rm -rf "$tmp"
+  rm -rf "$PACK_DIR"
+  rm -rf "$CONSUMER_DIR"
 }
 trap cleanup EXIT
 
-echo "[smoke-import-packed] Temp dir: $tmp"
+echo "[smoke-import-packed] Temp dir: $CONSUMER_DIR"
 
-# Pack from repo root. Prefer npm pack because it reflects the npm publish artifact.
-# (Yarn pack would also work, but npm pack is the closest representation of registry output.)
-
-echo "[smoke-import-packed] Packing..."
-if ! PACK_OUTPUT="$(npm pack --json)"; then
-  annotate error "npm pack failed"
+# Pack from repo root using Yarn to reflect publish artifacts.
+echo "[smoke-import-packed] Packing with Yarn..."
+TARBALL_PATH="${PACK_DIR}/package.tgz"
+if ! yarn pack --out "$TARBALL_PATH"; then
+  annotate error "yarn pack failed"
   exit 1
 fi
-if ! TARBALL_FILE="$(printf '%s\n' "$PACK_OUTPUT" | node "$ROOT_DIR/scripts/parse-npm-pack-filename.mjs")"; then
-  annotate error "Failed to parse npm pack output"
-  exit 1
-fi
-
-if [[ -z "${TARBALL_FILE}" ]]; then
-  annotate error "Failed to parse npm pack output: empty tarball filename"
-  exit 1
-fi
-
-# Be conservative about the expected tarball filename format: a basename with safe
-# characters ending in .tgz, with no path separators.
-if ! [[ "${TARBALL_FILE}" =~ ^[A-Za-z0-9._-]+\.tgz$ ]]; then
-  annotate error "Unexpected tarball filename from npm pack: '${TARBALL_FILE}'"
-  exit 1
-fi
-TARBALL_PATH="$ROOT_DIR/$TARBALL_FILE"
 
 echo "[smoke-import-packed] Tarball: $TARBALL_PATH"
 
-cd "$tmp"
+ENTRY_TAR_PATH="package/${ENTRY_RELATIVE}"
+if ! tar -tf "$TARBALL_PATH" | rg -F -x "$ENTRY_TAR_PATH" >/dev/null; then
+  annotate error "Expected entry point not found in tarball: ${ENTRY_TAR_PATH}"
+  exit 1
+fi
+
+cd "$CONSUMER_DIR"
 
 # Create a minimal consumer project and install the tarball.
 # Silence audit/fund noise to keep CI logs clean.
