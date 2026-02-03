@@ -1,0 +1,44 @@
+node_modules/
+.pnp.*
+.yarn/
+
+# Build outputs / coverage
+
+dist/
+build/
+coverage/
+
+# Logs
+
+*.log
+
+# Env files
+
+.env*
+
+# Packed tarballs
+
+*.tgz
+
+# OS / editor noise
+
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.tmp
+
+# Development-only files/directories not needed in published package
+specs/
+.github/
+.codex/
+.specify/
+scripts/prerelease/
+.editorconfig
+.prettierignore
+.prettierrc.js
+.shellcheckrc
+.gitattributes
+.gitignore
+AGENTS.md

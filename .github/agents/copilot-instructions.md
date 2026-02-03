@@ -1,9 +1,10 @@
-# eslint-config Development Guidelines
+﻿# eslint-config Development Guidelines
 
 Auto-generated from all feature plans. Last updated: 2025-12-23
 
 ## Active Technologies
 - Node.js (ESM) + Bash scripts; CI on Ubuntu runners + Yarn (Corepack), ESLint flat config; no new runtime deps (002-shellcheck-ci)
+- Node.js (ESM), JavaScript + Yarn 4, ESLint, Prettier, TypeScript (dev) (001-pre-release-preflight)
 
 - Node.js (ESM package); CI targets Node 20 and Node 22 + ESLint 9 (flat config), TypeScript tooling, `typescript-eslint`, `eslint-plugin-import` (001-ci-publish-codeql)
 
@@ -20,16 +21,18 @@ README.md
 
 ## Commands
 
-# Add commands for Node.js (ESM package); CI targets Node 20 and Node 22
+### Notes
+Command references are maintained in the Manual Additions section below under the "Common commands" heading (install, lint) and the "Release/publish expectations" note.
+
 
 ## Code Style
 
 Node.js (ESM package); CI targets Node 20 and Node 22: Follow standard conventions
 
 ## Recent Changes
-- 002-shellcheck-ci: Added Node.js (ESM) + Bash scripts; CI on Ubuntu runners + Yarn (Corepack), ESLint flat config; no new runtime deps
+- 001-pre-release-preflight: Added pre-release scripts, packaging checks, and CI/release enforcement workflow updates.
+- 002-shellcheck-ci: Added shellcheck CI workflow integration.
 
-- 001-ci-publish-codeql: Added Node.js (ESM package); CI targets Node 20 and Node 22 + ESLint 9 (flat config), TypeScript tooling, `typescript-eslint`, `eslint-plugin-import`
 
 <!-- MANUAL ADDITIONS START -->
 ## Notes for this repo
@@ -45,10 +48,12 @@ yarn.lock
 README.md
 ```
 
-Common commands:
+### Common commands
 
 - Install (deterministic): `corepack enable && yarn install --immutable`
 - Lint: `yarn eslint .`
 
-Release/publish expectations (per spec `001-ci-publish-codeql`): GitHub Release-driven publishing for semver tags `vX.Y.Z` (including prereleases like `vX.Y.Z-rc.1`), with npm provenance enabled.
+### Release/publish expectations
+
+GitHub Release-driven publishing for semver tags `vX.Y.Z` (including prereleases like `vX.Y.Z-rc.1`), with npm provenance enabled (per spec `001-ci-publish-codeql`).
 <!-- MANUAL ADDITIONS END -->
