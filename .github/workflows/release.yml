@@ -121,7 +121,7 @@ jobs:
         run: echo "dir=$(yarn config get cacheFolder)" >> "$GITHUB_OUTPUT"
 
       - name: Cache Yarn
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ steps.yarn-cache-dir.outputs.dir }}
           key: ${{ runner.os }}-yarn-lts-${{ hashFiles('yarn.lock') }}
@@ -161,7 +161,7 @@ jobs:
         run: echo "dir=$(yarn config get cacheFolder)" >> "$GITHUB_OUTPUT"
 
       - name: Cache Yarn
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ steps.yarn-cache-dir.outputs.dir }}
           key: ${{ runner.os }}-yarn-lts-${{ hashFiles('yarn.lock') }}
