@@ -1,5 +1,6 @@
 // Shared utilities for prerelease scripts.
 
+import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { execFile, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
@@ -84,7 +85,8 @@ export function parseNpmPackJson(stdout) {
 
 export async function runNpmPackJson({ cwd = process.cwd() } = {}) {
   try {
-    const { stdout } = await execFileAsync('npm', ['pack', '--json'], { cwd });
+    const { command, prefixArgs, env } = resolveNpmCommand();
+    const { stdout } = await execFileAsync(command, [...prefixArgs, 'pack', '--json'], { cwd, env });
     return parseNpmPackJson(stdout);
   } catch (error) {
     const stderr = error && typeof error === 'object' ? error.stderr : undefined;
@@ -111,8 +113,66 @@ export function runCommand(command, args = [], { cwd = process.cwd(), env = proc
   });
 }
 
+function resolveRunner(runner) {
+  if (runner !== 'yarn') {
+    return { command: runner, prefixArgs: [] };
+  }
+
+  const execPath = process.env.npm_execpath;
+  if (execPath && /\.(c?m?js)$/i.test(execPath)) {
+    return { command: process.execPath, prefixArgs: [execPath] };
+  }
+
+  const nodeDir = path.dirname(process.execPath);
+  const yarnCandidates = [
+    path.join(nodeDir, 'node_modules', 'corepack', 'dist', 'yarn.js'),
+    path.join(nodeDir, '..', 'lib', 'node_modules', 'corepack', 'dist', 'yarn.js')
+  ];
+
+  for (const candidate of yarnCandidates) {
+    if (existsSync(candidate)) {
+      return { command: process.execPath, prefixArgs: [candidate] };
+    }
+  }
+
+  return { command: runner, prefixArgs: [] };
+}
+
 export async function runScript(scriptName, { cwd = process.cwd(), runner = 'yarn' } = {}) {
-  await runCommand(runner, [scriptName], { cwd });
+  const { command, prefixArgs } = resolveRunner(runner);
+  await runCommand(command, [...prefixArgs, scriptName], { cwd });
+}
+
+function resolveNpmCommand() {
+  const execPath = process.env.npm_execpath;
+  const env = {
+    ...process.env,
+    COREPACK_ENABLE_PROJECT_SPEC: '0',
+    COREPACK_ENABLE_STRICT: '0'
+  };
+
+  if (execPath && /\.(c?m?js)$/i.test(execPath)) {
+    return { command: process.execPath, prefixArgs: [execPath], env };
+  }
+
+  const nodeDir = path.dirname(process.execPath);
+  const npmCandidates = [
+    path.join(nodeDir, 'node_modules', 'corepack', 'dist', 'npm.js'),
+    path.join(nodeDir, '..', 'lib', 'node_modules', 'corepack', 'dist', 'npm.js')
+  ];
+
+  for (const candidate of npmCandidates) {
+    if (existsSync(candidate)) {
+      return { command: process.execPath, prefixArgs: [candidate], env };
+    }
+  }
+
+  return { command: 'npm', prefixArgs: [], env };
+}
+
+export async function runNpmCommand(args, { cwd = process.cwd() } = {}) {
+  const { command, prefixArgs, env } = resolveNpmCommand();
+  await runCommand(command, [...prefixArgs, ...args], { cwd, env });
 }
 
 export async function runOptionalScriptsInOrder(

@@ -6,6 +6,7 @@ import {
   formatErrorMessage,
   loadPackageJson,
   runCommand,
+  runNpmCommand,
   runNpmPackJson
 } from './utils.mjs';
 
@@ -69,7 +70,7 @@ try {
   const tarballPath = path.join(process.cwd(), packedFilename);
   tempDir = await mkdtemp(path.join(os.tmpdir(), 'eslint-config-pack-'));
 
-  await runCommand('npm', ['install', tarballPath], { cwd: tempDir });
+  await runNpmCommand(['install', tarballPath], { cwd: tempDir });
   await runCommand('node', ['-e', `import('${pkg.name}').catch(err => { console.error(err); process.exit(1); });`], {
     cwd: tempDir
   });
