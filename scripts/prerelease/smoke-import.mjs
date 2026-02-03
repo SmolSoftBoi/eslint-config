@@ -17,24 +17,70 @@ const shouldSkipPackedImport = () => {
 
 const isCi = () => Boolean(process.env.CI);
 
-const resolveWorkspaceEntrypoint = (pkg) => {
-  if (typeof pkg.main === 'string') {
-    return pkg.main;
+const preferredExportKeys = ['import', 'default', 'require', 'node', 'browser', 'development', 'production'];
+
+const findEntrypoint = (value) => {
+  if (typeof value === 'string') {
+    return value;
   }
 
-  if (typeof pkg.exports === 'string') {
-    return pkg.exports;
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const entrypoint = findEntrypoint(item);
+      if (entrypoint) {
+        return entrypoint;
+      }
+    }
+    return null;
   }
 
-  if (pkg.exports && typeof pkg.exports === 'object' && typeof pkg.exports['.'] === 'string') {
-    return pkg.exports['.'];
+  if (value && typeof value === 'object') {
+    for (const key of preferredExportKeys) {
+      if (key in value) {
+        const entrypoint = findEntrypoint(value[key]);
+        if (entrypoint) {
+          return entrypoint;
+        }
+      }
+    }
+
+    for (const [key, propertyValue] of Object.entries(value)) {
+      if (preferredExportKeys.includes(key)) {
+        continue;
+      }
+
+      const entrypoint = findEntrypoint(propertyValue);
+      if (entrypoint) {
+        return entrypoint;
+      }
+    }
   }
 
   return null;
 };
 
+const resolveExportsEntrypoint = (exportsField) => {
+  if (exportsField && typeof exportsField === 'object' && !Array.isArray(exportsField)) {
+    if (exportsField['.']) {
+      return resolveExportsEntrypoint(exportsField['.']);
+    }
+  }
+
+  return findEntrypoint(exportsField);
+};
+
+const resolveWorkspaceEntrypoint = (pkg) => {
+  const exportsEntrypoint = resolveExportsEntrypoint(pkg.exports);
+  if (exportsEntrypoint) {
+    return exportsEntrypoint;
+  }
+
+  return typeof pkg.main === 'string' ? pkg.main : null;
+};
+
 let packedFilename = null;
 let tempDir = null;
+let skipPackedImport = false;
 
 try {
   const pkg = await loadPackageJson();
@@ -57,27 +103,29 @@ try {
 
   if (!isCi() && shouldSkipPackedImport()) {
     console.log('Skipping packed tarball import because SKIP_PACKED_IMPORT is set.');
-    process.exit(0);
+    skipPackedImport = true;
   }
 
-  const { filename } = await runNpmPackJson();
-  packedFilename = filename;
+  if (!skipPackedImport) {
+    const { filename } = await runNpmPackJson();
+    packedFilename = filename;
 
-  if (!packedFilename) {
-    throw new Error('npm pack --json did not return a tarball filename');
+    if (!packedFilename) {
+      throw new Error('npm pack --json did not return a tarball filename');
+    }
+
+    const tarballPath = path.join(process.cwd(), packedFilename);
+    tempDir = await mkdtemp(path.join(os.tmpdir(), 'eslint-config-pack-'));
+
+    await runNpmCommand(['install', tarballPath], { cwd: tempDir });
+    const importScript = `const pkgName = ${JSON.stringify(pkg.name)}; import(pkgName).catch(err => { console.error(err); process.exit(1); });`;
+    await runCommand('node', ['-e', importScript], {
+      cwd: tempDir
+    });
   }
-
-  const tarballPath = path.join(process.cwd(), packedFilename);
-  tempDir = await mkdtemp(path.join(os.tmpdir(), 'eslint-config-pack-'));
-
-  await runNpmCommand(['install', tarballPath], { cwd: tempDir });
-  const importScript = `const pkgName = ${JSON.stringify(pkg.name)}; import(pkgName).catch(err => { console.error(err); process.exit(1); });`;
-  await runCommand('node', ['-e', importScript], {
-    cwd: tempDir
-  });
 } catch (error) {
   console.error(formatErrorMessage('smoke import failed', error));
-  process.exit(1);
+  process.exitCode = 1;
 } finally {
   if (tempDir) {
     await rm(tempDir, { recursive: true, force: true });

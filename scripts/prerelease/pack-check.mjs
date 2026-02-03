@@ -76,7 +76,7 @@ try {
   }
 } catch (error) {
   console.error(formatErrorMessage('pack check failed', error));
-  process.exit(1);
+  process.exitCode = 1;
 } finally {
   if (packedFilename) {
     const tarballPath = path.join(process.cwd(), packedFilename);

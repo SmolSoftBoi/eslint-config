@@ -183,6 +183,7 @@ export function runCommand(command, args = [], { cwd = process.cwd(), env = proc
  * Determine the command and any prefix arguments to invoke the given runner, preferring a Node-executable Yarn wrapper when available.
  * @param {string} runner - The runner name or command (e.g. `'yarn'` or `'npm'`). When `'yarn'` this may resolve to a Node-executable wrapper if present.
  * @returns {{ command: string, prefixArgs: string[] }} An object with `command` set to the executable to spawn and `prefixArgs` containing any leading arguments that must precede the runner's normal arguments.
+ */
 function resolveRunner(runner) {
   if (runner !== 'yarn') {
     return { command: runner, prefixArgs: [] };
