@@ -28,3 +28,17 @@ Thumbs.db
 .vscode/
 *.swp
 *.tmp
+
+# Development-only files/directories not needed in published package
+specs/
+.github/
+.codex/
+.specify/
+scripts/prerelease/
+.editorconfig
+.prettierignore
+.prettierrc.js
+.shellcheckrc
+.gitattributes
+.gitignore
+AGENTS.md
