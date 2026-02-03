@@ -20,7 +20,8 @@ Auto-generated from all feature plans. Last updated: 2026-02-02
 
 ## Commands
 
-yarn test; yarn run lint
+yarn lint
+yarn prerelease
 
 ## Code Style
 
