@@ -71,7 +71,8 @@ try {
   tempDir = await mkdtemp(path.join(os.tmpdir(), 'eslint-config-pack-'));
 
   await runNpmCommand(['install', tarballPath], { cwd: tempDir });
-  await runCommand('node', ['-e', `import('${pkg.name}').catch(err => { console.error(err); process.exit(1); });`], {
+  const importScript = `const pkgName = ${JSON.stringify(pkg.name)}; import(pkgName).catch(err => { console.error(err); process.exit(1); });`;
+  await runCommand('node', ['-e', importScript], {
     cwd: tempDir
   });
 } catch (error) {

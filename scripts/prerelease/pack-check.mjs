@@ -8,8 +8,8 @@ import {
 
 const requiredFiles = ['eslint.config.mjs', 'index.mjs', 'README.md', 'LICENSE'];
 
-const normalizePath = (value) =>
-  value
+const normalizePath = (filePath) =>
+  filePath
     .replace(/^\.\/?/, '')
     .replace(/^\/+/, '')
     .replace(/\\/g, '/');
