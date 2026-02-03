@@ -2,6 +2,7 @@
   "name": "@smolpack/eslint-config",
   "packageManager": "yarn@4.1.0",
   "version": "1.0.0",
+  "license": "MIT",
   "type": "module",
   "main": "index.mjs",
   "scripts": {
