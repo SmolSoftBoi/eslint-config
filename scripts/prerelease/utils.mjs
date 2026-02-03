@@ -142,7 +142,11 @@ export function parseNpmPackJson(stdout) {
 export async function runNpmPackJson({ cwd = process.cwd() } = {}) {
   try {
     const { command, prefixArgs, env } = resolveNpmCommand();
-    const { stdout } = await execFileAsync(command, [...prefixArgs, 'pack', '--json'], { cwd, env });
+    const { stdout } = await execFileAsync(command, [...prefixArgs, 'pack', '--json'], {
+      cwd,
+      env,
+      maxBuffer: 8 * 1024 * 1024
+    });
     return parseNpmPackJson(stdout);
   } catch (error) {
     const stderr = error && typeof error === 'object' ? error.stderr : undefined;
