@@ -1,8 +1,12 @@
 {
   "name": "@smolpack/eslint-config",
   "packageManager": "yarn@4.1.0",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SmolSoftBoi/eslint-config.git"
+  },
   "type": "module",
   "main": "index.mjs",
   "scripts": {
