@@ -10,9 +10,9 @@ const requiredFiles = ['eslint.config.mjs', 'index.mjs', 'README.md', 'LICENSE']
 
 const normalizePath = (filePath) =>
   filePath
+    .replace(/\\/g, '/')
     .replace(/^\.\/?/, '')
-    .replace(/^\/+/, '')
-    .replace(/\\/g, '/');
+    .replace(/^\/+/, '');
 
 const collectEntrypoints = (value, entrypoints) => {
   if (typeof value === 'string') {

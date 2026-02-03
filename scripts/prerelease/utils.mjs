@@ -218,6 +218,11 @@ function resolveRunner(runner) {
  * @param {string} [options.runner='yarn'] - Runner to use for execution (for example `'yarn'` or a custom command).
  */
 export async function runScript(scriptName, { cwd = process.cwd(), runner = 'yarn' } = {}) {
+  if (runner === 'npm') {
+    await runNpmCommand(['run', scriptName], { cwd });
+    return;
+  }
+
   const { command, prefixArgs } = resolveRunner(runner);
   await runCommand(command, [...prefixArgs, scriptName], { cwd });
 }

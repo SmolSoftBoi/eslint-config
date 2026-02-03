@@ -10,12 +10,30 @@ Auto-generated from all feature plans. Last updated: 2026-02-02
 
 ```text
 .
+├── .codex/
+├── .devcontainer/
+├── .github/
+│   └── workflows/
+├── .specify/
+├── .vscode/
+├── .yarn/
+├── .editorconfig
+├── .gitattributes
+├── .gitignore
+├── .npmignore
+├── .prettierignore
+├── .prettierrc.js
+├── .shellcheckrc
+├── .yarnrc.yml
+├── AGENTS.md
 ├── eslint.config.mjs
 ├── index.mjs
+├── LICENSE
 ├── package.json
+├── README.md
 ├── scripts/
 ├── specs/
-└── .github/
+└── yarn.lock
 ```
 
 ## Commands
