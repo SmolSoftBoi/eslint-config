@@ -115,6 +115,7 @@ Publishing is **GitHub Release-driven**.
 ### Release flow
 
 1. Bump `package.json#version` and commit.
-2. Create a semver tag like `vX.Y.Z` (or prerelease `vX.Y.Z-rc.1`) pointing at that commit.
-3. Create a GitHub Release for that tag and include human-readable release notes.
-4. GitHub Actions runs `.github/workflows/release.yml` to validate and publish.
+2. Run `yarn prerelease` locally to validate linting, packaging, and import smoke tests.
+3. Create a semver tag like `vX.Y.Z` (or prerelease `vX.Y.Z-rc.1`) pointing at that commit.
+4. Create a GitHub Release for that tag and include human-readable release notes.
+5. GitHub Actions runs `.github/workflows/release.yml` to validate and publish.

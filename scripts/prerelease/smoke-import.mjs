@@ -1,0 +1,88 @@
+import { mkdtemp, rm } from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
+import {
+  formatErrorMessage,
+  loadPackageJson,
+  runCommand,
+  runNpmPackJson
+} from './utils.mjs';
+
+const shouldSkipPackedImport = () => {
+  const value = process.env.SKIP_PACKED_IMPORT;
+  return Boolean(value && value.trim());
+};
+
+const isCi = () => Boolean(process.env.CI);
+
+const resolveWorkspaceEntrypoint = (pkg) => {
+  if (typeof pkg.main === 'string') {
+    return pkg.main;
+  }
+
+  if (typeof pkg.exports === 'string') {
+    return pkg.exports;
+  }
+
+  if (pkg.exports && typeof pkg.exports === 'object' && typeof pkg.exports['.'] === 'string') {
+    return pkg.exports['.'];
+  }
+
+  return null;
+};
+
+let packedFilename = null;
+let tempDir = null;
+
+try {
+  const pkg = await loadPackageJson();
+
+  if (!pkg.name) {
+    throw new Error('package.json is missing a package name');
+  }
+
+  const workspaceEntrypoint = resolveWorkspaceEntrypoint(pkg);
+  if (!workspaceEntrypoint) {
+    throw new Error('Unable to resolve a workspace entrypoint from package.json');
+  }
+
+  const workspaceUrl = pathToFileURL(path.resolve(process.cwd(), workspaceEntrypoint)).href;
+  await import(workspaceUrl);
+
+  if (isCi() && shouldSkipPackedImport()) {
+    throw new Error('SKIP_PACKED_IMPORT is set in CI; packed import must not be skipped.');
+  }
+
+  if (!isCi() && shouldSkipPackedImport()) {
+    console.log('Skipping packed tarball import because SKIP_PACKED_IMPORT is set.');
+    process.exit(0);
+  }
+
+  const { filename } = await runNpmPackJson();
+  packedFilename = filename;
+
+  if (!packedFilename) {
+    throw new Error('npm pack --json did not return a tarball filename');
+  }
+
+  const tarballPath = path.join(process.cwd(), packedFilename);
+  tempDir = await mkdtemp(path.join(os.tmpdir(), 'eslint-config-pack-'));
+
+  await runCommand('npm', ['install', tarballPath], { cwd: tempDir });
+  await runCommand('node', ['-e', `import('${pkg.name}').catch(err => { console.error(err); process.exit(1); });`], {
+    cwd: tempDir
+  });
+} catch (error) {
+  console.error(formatErrorMessage('smoke import failed', error));
+  process.exit(1);
+} finally {
+  if (tempDir) {
+    await rm(tempDir, { recursive: true, force: true });
+  }
+
+  if (packedFilename) {
+    const tarballPath = path.join(process.cwd(), packedFilename);
+    await rm(tarballPath, { force: true });
+  }
+}

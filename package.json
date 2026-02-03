@@ -6,7 +6,12 @@
   "main": "index.mjs",
   "scripts": {
     "lint:shell": "node ./scripts/lint-shell.mjs",
-    "lint": "node ./scripts/lint.mjs"
+    "lint": "node ./scripts/lint.mjs",
+    "preflight": "node ./scripts/prerelease/preflight.mjs",
+    "pack:check": "node ./scripts/prerelease/pack-check.mjs",
+    "smoke:import": "node ./scripts/prerelease/smoke-import.mjs",
+    "prerelease": "yarn preflight && yarn pack:check && yarn smoke:import",
+    "prepublishOnly": "yarn prerelease"
   },
   "keywords": [
     "eslint",

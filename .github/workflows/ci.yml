@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   lint-and-smoke:
-    name: Lint + import smoke-test
+    name: Pre-release validation
     runs-on: ubuntu-latest
     env:
       COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
@@ -57,11 +57,8 @@ jobs:
       - name: Install dependencies (immutable, with fallback)
         run: bash ./scripts/yarn-install-immutable.sh
 
-      - name: Run ESLint
-        run: yarn eslint .
-
-      - name: Import smoke-test (packed consumer import)
-        run: bash ./scripts/smoke-import-packed.sh
+      - name: Run pre-release validation
+        run: yarn prerelease
 
   shellcheck:
     name: ShellCheck (scripts + workflow run blocks)

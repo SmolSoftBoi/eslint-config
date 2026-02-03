@@ -1,0 +1,30 @@
+node_modules/
+.pnp.*
+.yarn/
+
+# Build outputs / coverage
+
+dist/
+build/
+coverage/
+
+# Logs
+
+*.log
+
+# Env files
+
+.env*
+
+# Packed tarballs
+
+*.tgz
+
+# OS / editor noise
+
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.tmp
