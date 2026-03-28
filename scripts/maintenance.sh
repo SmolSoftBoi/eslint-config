@@ -3,6 +3,21 @@ set -euo pipefail
 
 echo "✅ Running maintenance for eslint-config"
 
+run_apt_get() {
+  if [ "${EUID:-$(id -u)}" -eq 0 ]; then
+    apt-get "$@"
+    return
+  fi
+
+  if command -v sudo >/dev/null 2>&1; then
+    sudo apt-get "$@"
+    return
+  fi
+
+  echo "[maintenance] ShellCheck installation requires elevated privileges. Install it manually or rerun the script with sudo." >&2
+  exit 1
+}
+
 RUN_DIR="$(pwd)"
 REPO_ROOT=""
 
@@ -28,8 +43,8 @@ fi
 if ! command -v shellcheck >/dev/null 2>&1; then
   echo "[maintenance] Installing ShellCheck"
   if command -v apt-get >/dev/null 2>&1; then
-    apt-get update
-    apt-get install -y shellcheck
+    run_apt_get update
+    run_apt_get install -y shellcheck
   else
     echo "[maintenance] Missing package manager to install ShellCheck." >&2
     exit 1
@@ -42,6 +57,9 @@ if command -v corepack >/dev/null 2>&1; then
 fi
 
 echo "[maintenance] Installing dependencies (immutable)"
-"$REPO_ROOT/scripts/yarn-install-immutable.sh"
+(
+  cd "$REPO_ROOT"
+  ./scripts/yarn-install-immutable.sh
+)
 
 echo "✅ Maintenance complete"
