@@ -195,7 +195,11 @@ if [ "${#PEER_INSTALL_ARGS[@]}" -gt 0 ]; then
   INSTALL_ARGS+=("${PEER_INSTALL_ARGS[@]}")
 fi
 
-npm install --silent --no-audit --no-fund --legacy-peer-deps "${INSTALL_ARGS[@]}"
+if [ "${SMOKE_USE_LEGACY_PEER_DEPS:-}" = "1" ] || [ "${SMOKE_USE_LEGACY_PEER_DEPS:-}" = "true" ]; then
+  npm install --silent --no-audit --no-fund --legacy-peer-deps "${INSTALL_ARGS[@]}"
+else
+  npm install --silent --no-audit --no-fund "${INSTALL_ARGS[@]}"
+fi
 
 # Run the import assertion from within the temp consumer project so Node resolves
 # the package from its local node_modules.
