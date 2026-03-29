@@ -54,7 +54,15 @@ detect_yarn_pack_output_flag() {
   esac
 }
 
-ROOT_DIR="$(pwd)"
+SCRIPT_DIR="$(CDPATH='' cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(CDPATH='' cd -- "${SCRIPT_DIR}/.." && pwd)"
+
+if [ ! -f "$ROOT_DIR/package.json" ] || [ ! -f "$SCRIPT_DIR/smoke-import-packed.mjs" ]; then
+  annotate error "Failed to locate repo root from script path: ${SCRIPT_DIR}"
+  exit 1
+fi
+
+cd "$ROOT_DIR"
 
 if ! PKG_META="$(node --input-type=module <<'NODE'
 import { readFileSync } from 'node:fs';
@@ -203,7 +211,7 @@ fi
 
 # Run the import assertion from within the temp consumer project so Node resolves
 # the package from its local node_modules.
-cp "$ROOT_DIR/scripts/smoke-import-packed.mjs" ./smoke-import-packed.mjs
+cp "$SCRIPT_DIR/smoke-import-packed.mjs" ./smoke-import-packed.mjs
 
 # Import by package name as consumers do.
 # Also assert a default export exists, since the README implies default export usage.
