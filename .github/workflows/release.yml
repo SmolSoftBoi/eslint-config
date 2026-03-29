@@ -27,14 +27,14 @@ permissions:
 
 jobs:
   checks:
-    name: Checks (lint + smoke)
+    name: Pre-release validation
     runs-on: ubuntu-latest
     env:
       COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Validate release tag and release notes
         if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && !inputs.skip_validation)
@@ -108,7 +108,7 @@ jobs:
           fi
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: lts/*
           registry-url: https://registry.npmjs.org/
@@ -121,7 +121,7 @@ jobs:
         run: echo "dir=$(yarn config get cacheFolder)" >> "$GITHUB_OUTPUT"
 
       - name: Cache Yarn
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ steps.yarn-cache-dir.outputs.dir }}
           key: ${{ runner.os }}-yarn-lts-${{ hashFiles('yarn.lock') }}
@@ -132,11 +132,8 @@ jobs:
       - name: Install dependencies (immutable, with fallback)
         run: bash ./scripts/yarn-install-immutable.sh
 
-      - name: Run ESLint
-        run: yarn eslint .
-
-      - name: Import smoke-test (packed consumer import)
-        run: bash ./scripts/smoke-import-packed.sh
+      - name: Run pre-release validation
+        run: yarn prerelease
 
   publish:
     name: Publish to npm
@@ -148,10 +145,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: lts/*
           registry-url: https://registry.npmjs.org/
@@ -164,7 +161,7 @@ jobs:
         run: echo "dir=$(yarn config get cacheFolder)" >> "$GITHUB_OUTPUT"
 
       - name: Cache Yarn
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ steps.yarn-cache-dir.outputs.dir }}
           key: ${{ runner.os }}-yarn-lts-${{ hashFiles('yarn.lock') }}

@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   lint-and-smoke:
-    name: Lint + import smoke-test
+    name: Pre-release validation
     runs-on: ubuntu-latest
     env:
       COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
@@ -31,10 +31,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
 
@@ -46,7 +46,7 @@ jobs:
         run: echo "dir=$(yarn config get cacheFolder)" >> "$GITHUB_OUTPUT"
 
       - name: Cache Yarn
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ steps.yarn-cache-dir.outputs.dir }}
           key: ${{ runner.os }}-yarn-${{ matrix.node-version }}-${{ hashFiles('yarn.lock') }}
@@ -57,11 +57,8 @@ jobs:
       - name: Install dependencies (immutable, with fallback)
         run: bash ./scripts/yarn-install-immutable.sh
 
-      - name: Run ESLint
-        run: yarn eslint .
-
-      - name: Import smoke-test (packed consumer import)
-        run: bash ./scripts/smoke-import-packed.sh
+      - name: Run pre-release validation
+        run: yarn prerelease
 
   shellcheck:
     name: ShellCheck (scripts + workflow run blocks)
@@ -71,7 +68,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install ShellCheck
         run: |

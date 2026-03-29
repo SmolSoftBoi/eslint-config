@@ -1,7 +1,12 @@
 {
   "name": "@smolpack/eslint-config",
   "packageManager": "yarn@4.1.0",
-  "version": "1.0.0",
+  "version": "1.0.2",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SmolSoftBoi/eslint-config.git"
+  },
   "type": "module",
   "main": "index.mjs",
   "scripts": {
@@ -9,16 +14,19 @@
     "lint": "node ./scripts/lint.mjs",
     "typecheck": "node ./scripts/typecheck.mjs",
     "test": "node ./scripts/test.mjs",
+    "preflight": "node ./scripts/prerelease/preflight.mjs",
+    "pack:check": "node ./scripts/prerelease/pack-check.mjs",
+    "smoke:import": "node ./scripts/prerelease/smoke-import.mjs",
     "smoke:pack": "bash ./scripts/smoke-import-packed.sh",
-    "preflight": "yarn lint && yarn typecheck && yarn test && yarn smoke:pack",
-    "prerelease": "yarn preflight"
+    "prerelease": "yarn preflight && yarn pack:check && yarn smoke:import",
+    "prepublishOnly": "yarn prerelease"
   },
   "keywords": [
     "eslint",
     "eslintconfig"
   ],
   "dependencies": {
-    "typescript-eslint": "^8.51.0"
+    "typescript-eslint": "^8.54.0"
   },
   "peerDependencies": {
     "@eslint/js": ">=9.17.0",
@@ -36,7 +44,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.32.0",
-    "prettier": "^3.7.4",
+    "prettier": "^3.8.1",
     "typescript": "^5.9.3"
   }
 }

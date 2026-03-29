@@ -9,13 +9,37 @@ Auto-generated from all feature plans. Last updated: 2026-02-02
 ## Project Structure
 
 ```text
-src/
-tests/
+.
+├── .codex/
+├── .devcontainer/
+├── .github/
+│   └── workflows/
+├── .specify/
+├── .vscode/
+├── .yarn/
+├── .editorconfig
+├── .gitattributes
+├── .gitignore
+├── .npmignore
+├── .prettierignore
+├── .prettierrc.js
+├── .shellcheckrc
+├── .yarnrc.yml
+├── AGENTS.md
+├── eslint.config.mjs
+├── index.mjs
+├── LICENSE
+├── package.json
+├── README.md
+├── scripts/
+├── specs/
+└── yarn.lock
 ```
 
 ## Commands
 
-yarn test; yarn run lint
+yarn lint
+yarn prerelease
 
 ## Code Style
 

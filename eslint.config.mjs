@@ -8,7 +8,7 @@ export default typescriptEslint.config(
   config,
   eslintConfigPrettier,
   {
-    ignores: ['.pnp.cjs', '.pnp.loader.mjs']
+    ignores: ['.pnp.cjs', '.pnp.loader.mjs', 'node_modules/', 'dist/', 'build/', 'coverage/', '.yarn/']
   },
   {
     files: ['scripts/**/*.mjs'],

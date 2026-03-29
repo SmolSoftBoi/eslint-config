@@ -85,9 +85,10 @@ Contributions are what make the open source community such an amazing place to l
 
 ### Local validation
 
-- `yarn preflight` runs linting, type checks (when `tsconfig.json` exists), tests (placeholder when not configured), and the packaging smoke test.
-- `yarn prerelease` is an alias for `yarn preflight` to keep release automation consistent.
-- `yarn smoke:pack` builds the package with `yarn pack`, verifies the entry point is included, and imports the packed artifact.
+- `yarn preflight` runs linting first, then any defined optional checks in order: `lint:shell`, `typecheck`, and `test`.
+- `yarn prerelease` runs `yarn preflight`, validates the packed file list, and smoke-tests importing the packed tarball.
+- `yarn smoke:import` runs the Node-based packed import smoke test used by the prerelease flow.
+- `yarn smoke:pack` runs the shell-based `yarn pack` smoke test directly when you need to debug packed import behaviour.
 
 ### ShellCheck (shell script linting)
 
@@ -121,6 +122,7 @@ Publishing is **GitHub Release-driven**.
 ### Release flow
 
 1. Bump `package.json#version` and commit.
-2. Create a semver tag like `vX.Y.Z` (or prerelease `vX.Y.Z-rc.1`) pointing at that commit.
-3. Create a GitHub Release for that tag and include human-readable release notes.
-4. GitHub Actions runs `.github/workflows/release.yml` to validate and publish.
+2. Run `yarn prerelease` locally to validate linting, packaging, and import smoke tests.
+3. Create a semver tag like `vX.Y.Z` (or prerelease `vX.Y.Z-rc.1`) pointing at that commit.
+4. Create a GitHub Release for that tag and include human-readable release notes.
+5. GitHub Actions runs `.github/workflows/release.yml` to validate and publish.

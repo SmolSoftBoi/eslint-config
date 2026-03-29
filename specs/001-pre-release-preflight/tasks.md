@@ -16,11 +16,11 @@ description: "Task list for pre-release preflight implementation"
 
 **Purpose**: Shared utilities needed by multiple scripts
 
-- [ ] T001 Create shared pre-release utilities module in scripts/prerelease/utils.mjs with baseline helpers (e.g., `readPackageJsonFile()`, `parsePackageJsonString()`)
-- [ ] T013 Implement npm pack execution helpers in scripts/prerelease/utils.mjs
-- [ ] T014 Implement actionable error formatting helpers in scripts/prerelease/utils.mjs, building on the baseline helpers from T001
-- [ ] T016 Add script discovery helpers for reading scripts defined in package.json
-- [ ] T019 Extract package metadata helpers (name, main, exports, files) in scripts/prerelease/utils.mjs, building on T001
+- [x] T001 Create shared pre-release utilities module in scripts/prerelease/utils.mjs with baseline helpers (e.g., `readPackageJsonFile()`, `parsePackageJsonString()`)
+- [x] T013 Implement npm pack execution helpers in scripts/prerelease/utils.mjs
+- [x] T014 Implement actionable error formatting helpers in scripts/prerelease/utils.mjs, building on the baseline helpers from T001
+- [x] T016 Add script discovery helpers for reading scripts defined in package.json
+- [x] T019 Extract package metadata helpers (name, main, exports, files) in scripts/prerelease/utils.mjs, building on T001
 
 **Notes**: T013 and T014 extend the shared utilities from T001 by adding pack execution and error formatting helpers.
 
@@ -30,11 +30,11 @@ description: "Task list for pre-release preflight implementation"
 
 **Purpose**: Wiring required to run pre-release checks
 
-- [ ] T002 Update package scripts in package.json to add `preflight`, `pack:check`, `smoke:import`, and `prerelease`
-- [ ] T012 Add conditional runner helpers in scripts/prerelease/utils.mjs to execute optional scripts in the specified order when present in package.json (`lint:shell`, `typecheck`, `test`).
-- [ ] T020 Add optional-script error handling behavior: skip missing optional scripts and fail fast when an optional script exists but exits with an error (see Notes below).
-- [ ] T015 Implement preflight command runner in scripts/prerelease/preflight.mjs (validate that the mandatory `lint` script exists, invoke optional scripts via T012 helpers, use utils helpers; per FR-001d-ii, FR-001d-iii, FR-001d-iv in spec.md)
-- [ ] T017 Add or verify `prepublishOnly` script behavior; if added, ensure it runs the `prerelease` script (document decision if omitted)
+- [x] T002 Update package scripts in package.json to add `preflight`, `pack:check`, `smoke:import`, and `prerelease`
+- [x] T012 Add conditional runner helpers in scripts/prerelease/utils.mjs to execute optional scripts in the specified order when present in package.json (`lint:shell`, `typecheck`, `test`).
+- [x] T020 Add optional-script error handling behavior: skip missing optional scripts and fail fast when an optional script exists but exits with an error (see Notes below).
+- [x] T015 Implement preflight command runner in scripts/prerelease/preflight.mjs (validate that the mandatory `lint` script exists, invoke optional scripts via T012 helpers, use utils helpers; per FR-001d-ii, FR-001d-iii, FR-001d-iv in spec.md)
+- [x] T017 Add or verify `prepublishOnly` script behavior; if added, ensure it runs the `prerelease` script (document decision if omitted)
 
 **Notes**:
 - T012 adds conditional runner helpers to execute optional scripts in the specified order when present (`lint:shell`, `typecheck`, `test`).
@@ -55,9 +55,9 @@ description: "Task list for pre-release preflight implementation"
 **Independent Test**: Run `yarn prerelease` locally and confirm it runs linting, pack check, and import smoke tests, failing with actionable errors when a step breaks.
 
 ### Implementation for User Story 1
-- [ ] T003 [US1] Implement pack validation in scripts/prerelease/pack-check.mjs.
-- [ ] T004 [US1] Implement smoke import checks in scripts/prerelease/smoke-import.mjs.
-- [ ] T005 [US1] Ensure new scripts emit actionable error messages and clean up temp artifacts.
+- [x] T003 [US1] Implement pack validation in scripts/prerelease/pack-check.mjs.
+- [x] T004 [US1] Implement smoke import checks in scripts/prerelease/smoke-import.mjs.
+- [x] T005 [US1] Ensure new scripts emit actionable error messages and clean up temp artifacts.
 
 **Notes**:
 - T003: Use `npm pack --json` to list contents and fail on missing required files/entrypoints.
@@ -75,9 +75,9 @@ description: "Task list for pre-release preflight implementation"
 **Independent Test**: Trigger CI and Release workflows and confirm `yarn prerelease` runs and blocks publish on failure.
 
 ### Implementation for User Story 2
-- [ ] T006 [US2] Update CI workflow to run yarn prerelease in .github/workflows/ci.yml
-- [ ] T007 [US2] Update Release workflow to run yarn prerelease before publish in .github/workflows/release.yml
-- [ ] T010 [US2] Confirm CI matrix includes lts/* and node while Release remains lts/* only in .github/workflows/ci.yml and .github/workflows/release.yml
+- [x] T006 [US2] Update CI workflow to run yarn prerelease in .github/workflows/ci.yml
+- [x] T007 [US2] Update Release workflow to run yarn prerelease before publish in .github/workflows/release.yml
+- [x] T010 [US2] Confirm CI matrix includes lts/* and node while Release remains lts/* only in .github/workflows/ci.yml and .github/workflows/release.yml
 
 **Checkpoint**: CI and Release workflows enforce prerelease validation
 
@@ -91,8 +91,8 @@ description: "Task list for pre-release preflight implementation"
 
 ### Implementation for User Story 3
 
-- [ ] T008 [US3] Add a maintainer note for prerelease validation in README.md (Releasing or equivalent section)
-- [ ] T018 [US3] Add release notes guidance (README release section, changelog, or GitHub release notes workflow note)
+- [x] T008 [US3] Add a maintainer note for prerelease validation in README.md (Releasing or equivalent section)
+- [x] T018 [US3] Add release notes guidance (README release section, changelog, or GitHub release notes workflow note)
 
 **Checkpoint**: Maintainers can follow the documented prerelease flow
 
@@ -102,8 +102,8 @@ description: "Task list for pre-release preflight implementation"
 
 **Purpose**: Final consistency checks and documentation alignment
 
-- [ ] T009 [P] Verify quickstart commands align with updated scripts in specs/001-pre-release-preflight/quickstart.md (maps to FR-005)
-- [ ] T011 [P] Verify release workflow still publishes via npm publish in .github/workflows/release.yml
+- [x] T009 [P] Verify quickstart commands align with updated scripts in specs/001-pre-release-preflight/quickstart.md (maps to FR-005)
+- [x] T011 [P] Verify release workflow still publishes via npm publish in .github/workflows/release.yml
 
 ---
 
