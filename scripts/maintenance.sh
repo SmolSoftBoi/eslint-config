@@ -31,7 +31,9 @@ done
 
 if [ -z "$REPO_ROOT" ] && command -v git >/dev/null 2>&1; then
   if GIT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"; then
-    REPO_ROOT="$GIT_ROOT"
+    if [ -f "$GIT_ROOT/package.json" ] && [ -f "$GIT_ROOT/scripts/yarn-install-immutable.sh" ]; then
+      REPO_ROOT="$GIT_ROOT"
+    fi
   fi
 fi
 
