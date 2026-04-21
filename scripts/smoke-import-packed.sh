@@ -81,15 +81,21 @@ try {
 
     return `${peerName}@${installRange}`;
   });
+  const rootExport =
+    typeof pkg.exports === 'string'
+      ? pkg.exports
+      : pkg.exports?.['.'];
+
   let entry = 'index.mjs';
-  if (typeof pkg.exports === 'string') {
-    entry = pkg.exports;
-  } else if (
-    pkg.exports &&
-    typeof pkg.exports === 'object' &&
-    typeof pkg.exports['.'] === 'string'
-  ) {
-    entry = pkg.exports['.'];
+  if (typeof rootExport === 'string') {
+    entry = rootExport;
+  } else if (rootExport && typeof rootExport === 'object') {
+    entry =
+      rootExport.import ??
+      rootExport.default ??
+      rootExport.node ??
+      rootExport.require ??
+      entry;
   } else if (typeof pkg.main === 'string') {
     entry = pkg.main;
   }
