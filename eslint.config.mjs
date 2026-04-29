@@ -21,9 +21,9 @@ export default typescriptEslint.config(
     }
   },
   {
-    // Ensure eslint-plugin-import can resolve ESM + TS ecosystem deps in this repo.
+    // Ensure eslint-plugin-import-x can resolve ESM + TS ecosystem deps in this repo.
     settings: {
-      'import/resolver': {
+      'import-x/resolver': {
         node: {
           extensions: ['.js', '.mjs', '.cjs', '.ts', '.tsx']
         },

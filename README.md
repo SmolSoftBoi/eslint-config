@@ -22,7 +22,7 @@ yarn add --dev \
   @eslint/js \
   typescript \
   typescript-eslint \
-  eslint-plugin-import \
+  eslint-plugin-import-x \
   eslint-import-resolver-typescript \
   eslint-config-prettier
 ```
@@ -64,6 +64,9 @@ export default [
 ```bash
 yarn eslint .
 ```
+
+Import-related rules use the `import-x/` namespace. For example, override
+`import-x/no-unresolved` rather than the legacy `import/no-unresolved` rule name.
 
 ## Support
 

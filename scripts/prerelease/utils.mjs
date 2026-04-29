@@ -33,7 +33,7 @@ export function parsePackageJsonString(text) {
     return JSON.parse(text);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Failed to parse package.json: ${message}`);
+    throw new Error(`Failed to parse package.json: ${message}`, { cause: error });
   }
 }
 
@@ -110,7 +110,7 @@ export function parseNpmPackJson(stdout) {
     parsed = JSON.parse(stdout);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`npm pack --json output was not valid JSON: ${message}`);
+    throw new Error(`npm pack --json output was not valid JSON: ${message}`, { cause: error });
   }
 
   if (!Array.isArray(parsed) || parsed.length === 0) {
@@ -151,7 +151,7 @@ export async function runNpmPackJson({ cwd = process.cwd() } = {}) {
   } catch (error) {
     const stderr = error && typeof error === 'object' ? error.stderr : undefined;
     const message = stderr ? String(stderr).trim() : error instanceof Error ? error.message : String(error);
-    throw new Error(`npm pack --json failed: ${message}`);
+    throw new Error(`npm pack --json failed: ${message}`, { cause: error });
   }
 }
 
