@@ -92,11 +92,11 @@ export function getPackageMetadata(pkg) {
 }
 
 /**
- * Parse the JSON produced by `npm pack --json` and extract the pack items, files array and primary filename.
- * @param {string} stdout - The stdout from running `npm pack --json`.
- * @returns {{packItems: Array, files: Array, filename: string|null}} An object containing the full parsed pack items array (`packItems`), the `files` array from the first pack item (`files`), and the `filename` of the first pack item or `null` if not present (`filename`).
+ * Parse npm pack --json output and extract the array of pack items, the first item's files array, and its filename.
+ * @param {string} stdout - Stdout produced by running `npm pack --json`.
+ * @returns {{packItems: Array, files: Array, filename: string|null}} An object with `packItems` (the parsed array of pack items), `files` (the `files` array from the first pack item) and `filename` (the first pack item's filename, or `null` if absent).
  * @throws {Error} If `stdout` is empty or only whitespace.
- * @throws {Error} If `stdout` is not valid JSON.
+ * @throws {Error} If `stdout` is not valid JSON (the original parse error is attached as `cause`).
  * @throws {Error} If the parsed JSON is not a non-empty array of pack items.
  * @throws {Error} If the first pack item does not include a `files` array.
  */
