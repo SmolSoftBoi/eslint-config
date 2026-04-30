@@ -86,6 +86,13 @@ Contributions are what make the open source community such an amazing place to l
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
+### Local validation
+
+- `yarn preflight` runs linting first, then any defined optional checks in order: `lint:shell`, `typecheck`, and `test`.
+- `yarn prerelease` runs `yarn preflight`, validates the packed file list, and smoke-tests importing the packed tarball.
+- `yarn smoke:import` runs the Node-based packed import smoke test used by the prerelease flow.
+- `yarn smoke:pack` runs the shell-based `yarn pack` smoke test directly when you need to debug packed import behaviour.
+
 ### ShellCheck (shell script linting)
 
 This repo uses **ShellCheck** to lint repository-tracked `*.sh` scripts.
