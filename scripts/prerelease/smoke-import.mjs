@@ -78,6 +78,16 @@ const resolveWorkspaceEntrypoint = (pkg) => {
   return typeof pkg.main === 'string' ? pkg.main : null;
 };
 
+const resolvePeerInstallSpecs = (pkg) =>
+  Object.entries(pkg.peerDependencies ?? {}).map(([peerName, peerRange]) => {
+    const installRange =
+      pkg.devDependencies?.[peerName] ??
+      pkg.dependencies?.[peerName] ??
+      peerRange;
+
+    return `${peerName}@${installRange}`;
+  });
+
 let packedFilename = null;
 let tempDir = null;
 let skipPackedImport = false;
@@ -89,6 +99,7 @@ try {
     throw new Error('package.json is missing a package name');
   }
 
+  const peerInstallSpecs = resolvePeerInstallSpecs(pkg);
   const workspaceEntrypoint = resolveWorkspaceEntrypoint(pkg);
   if (!workspaceEntrypoint) {
     throw new Error('Unable to resolve a workspace entrypoint from package.json');
@@ -117,7 +128,7 @@ try {
     const tarballPath = path.join(process.cwd(), packedFilename);
     tempDir = await mkdtemp(path.join(os.tmpdir(), 'eslint-config-pack-'));
 
-    await runNpmCommand(['install', tarballPath], { cwd: tempDir });
+    await runNpmCommand(['install', tarballPath, ...peerInstallSpecs], { cwd: tempDir });
     const importScript = `const pkgName = ${JSON.stringify(pkg.name)}; import(pkgName).catch(err => { console.error(err); process.exit(1); });`;
     await runCommand('node', ['-e', importScript], {
       cwd: tempDir
