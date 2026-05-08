@@ -1,9 +1,9 @@
 // @ts-check
 
 import config from "./index.mjs";
-import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
+import { createTypeScriptImportResolver } from "eslint-import-resolver-typescript";
 import typescriptEslint from 'typescript-eslint';
-import { createNodeResolver } from 'eslint-plugin-import-x';
+import { createNodeResolver } from "eslint-plugin-import-x";
 import eslintConfigPrettier from "eslint-config-prettier";
 
 export default typescriptEslint.config(
