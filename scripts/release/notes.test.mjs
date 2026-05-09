@@ -4,7 +4,8 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { generateReleaseNotes, getPreviousReleaseTag } from './notes.mjs';
+import { pathToFileURL } from 'node:url';
+import { generateReleaseNotes, getPreviousReleaseTag, parseArgs } from './notes.mjs';
 
 function git(cwd, args) {
   return execFileSync('git', args, {
@@ -60,7 +61,13 @@ test('getPreviousReleaseTag uses the nearest lower tag when regenerating older r
     git(tempDir, ['config', 'user.email', 'test@example.com']);
     git(tempDir, ['config', 'user.name', 'Release Test']);
 
-    await writeFile(path.join(tempDir, 'package.json'), '{}\n');
+    await writeFile(
+      path.join(tempDir, 'package.json'),
+      JSON.stringify({
+        name: '@smolpack/eslint-config',
+        version: '1.2.0'
+      })
+    );
     git(tempDir, ['add', 'package.json']);
     git(tempDir, ['commit', '-m', 'Initial release']);
     git(tempDir, ['tag', 'v1.0.0']);
@@ -82,9 +89,46 @@ test('getPreviousReleaseTag uses the nearest lower tag when regenerating older r
       }),
       'v1.0.0'
     );
+
+    const result = await generateReleaseNotes({
+      cwd: tempDir,
+      version: '1.1.0'
+    });
+
+    assert.match(result.notes, /- Release 1\.1\.0/u);
+    assert.doesNotMatch(result.notes, /- Release 1\.2\.0/u);
   } finally {
     await rm(tempDir, { force: true, recursive: true });
   }
+});
+
+test('parseArgs requires values for release notes options', () => {
+  assert.throws(() => parseArgs(['--version']), /--version option requires a value/u);
+  assert.throws(
+    () => parseArgs(['--version', '--output', 'notes.md']),
+    /--version option requires a value/u
+  );
+  assert.throws(() => parseArgs(['--output']), /--output option requires a value/u);
+  assert.throws(
+    () => parseArgs(['--output', '--version', '1.2.3']),
+    /--output option requires a value/u
+  );
+});
+
+test('notes module import is safe when process argv script path is unset', () => {
+  const moduleUrl = pathToFileURL(path.resolve('scripts/release/notes.mjs')).href;
+
+  execFileSync(
+    process.execPath,
+    [
+      '--input-type=module',
+      '--eval',
+      `process.argv[1] = undefined; await import(${JSON.stringify(moduleUrl)});`
+    ],
+    {
+      encoding: 'utf8'
+    }
+  );
 });
 
 test('getPreviousReleaseTag ignores prerelease tags for stable release baselines', async () => {

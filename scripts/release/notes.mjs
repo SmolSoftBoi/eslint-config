@@ -128,8 +128,13 @@ export function getPreviousReleaseTag({ currentTag, cwd = process.cwd(), run = r
   return candidates[0]?.tag ?? null;
 }
 
-export function getCommitSubjects({ cwd = process.cwd(), fromTag = null, run = runGit } = {}) {
-  const range = fromTag ? `${fromTag}..HEAD` : 'HEAD';
+export function getCommitSubjects({
+  cwd = process.cwd(),
+  fromTag = null,
+  run = runGit,
+  toRef = null
+} = {}) {
+  const range = fromTag ? `${fromTag}..${toRef ?? 'HEAD'}` : (toRef ?? 'HEAD');
   const output = run(['log', '--format=%s', range], cwd);
 
   return output
@@ -179,7 +184,13 @@ export async function generateReleaseNotes({
   const releaseVersion = normalizeVersionInput(version ?? pkg.version);
   const currentTag = `v${releaseVersion}`;
   const previousTag = getPreviousReleaseTag({ currentTag, cwd, run });
-  const commits = getCommitSubjects({ cwd, fromTag: previousTag, run });
+  const currentTagExists = getSemverTags({ cwd, run }).includes(currentTag);
+  const commits = getCommitSubjects({
+    cwd,
+    fromTag: previousTag,
+    run,
+    toRef: currentTagExists ? currentTag : null
+  });
   const notes = formatReleaseNotes({
     commits,
     currentTag,
@@ -202,7 +213,16 @@ export async function generateReleaseNotes({
   };
 }
 
-function parseArgs(argv) {
+function readRequiredOptionValue(argv, index, optionName) {
+  const value = argv[index + 1];
+  if (!value || value.startsWith('-')) {
+    throw new Error(`${optionName} option requires a value.`);
+  }
+
+  return value;
+}
+
+export function parseArgs(argv) {
   const args = {
     outputPath: null,
     version: null
@@ -212,13 +232,13 @@ function parseArgs(argv) {
     const arg = argv[index];
 
     if (arg === '--output') {
-      args.outputPath = argv[index + 1];
+      args.outputPath = readRequiredOptionValue(argv, index, '--output');
       index += 1;
       continue;
     }
 
     if (arg === '--version') {
-      args.version = argv[index + 1];
+      args.version = readRequiredOptionValue(argv, index, '--version');
       index += 1;
       continue;
     }
@@ -231,7 +251,7 @@ function parseArgs(argv) {
   return args;
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
     const { outputPath, version } = parseArgs(process.argv.slice(2));
     const { notes } = await generateReleaseNotes({ outputPath, version });
