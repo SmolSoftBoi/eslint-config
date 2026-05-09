@@ -9,6 +9,7 @@ import {
   resolveReleaseContext,
   validateReleaseFields
 } from './core.mjs';
+import { parseArgs } from './validate.mjs';
 
 test('parseReleaseTag accepts stable and prerelease tags', () => {
   assert.deepEqual(parseReleaseTag('v1.2.3'), {
@@ -56,6 +57,49 @@ test('validateReleaseFields rejects empty release notes when required', () => {
 test('getNpmDistTagForVersion maps stable releases to latest and prereleases to next', () => {
   assert.equal(getNpmDistTagForVersion('1.2.3'), 'latest');
   assert.equal(getNpmDistTagForVersion('1.2.3-rc.1'), 'next');
+});
+
+test('parseArgs accepts both release validation tag forms', () => {
+  assert.deepEqual(parseArgs(['--tag=v1.2.3', '--skip-release-notes']), {
+    skipReleaseNotes: true,
+    tag: 'v1.2.3'
+  });
+
+  assert.deepEqual(parseArgs(['--tag', 'v1.2.3-rc.1', '--skip-release-notes']), {
+    skipReleaseNotes: true,
+    tag: 'v1.2.3-rc.1'
+  });
+});
+
+test('parseArgs rejects --tag without a value', () => {
+  assert.throws(() => parseArgs(['--tag']), /--tag option requires a value/u);
+});
+
+test('resolveReleaseContext fails fast for explicit tag validation without release-note skip', async () => {
+  await assert.rejects(
+    () =>
+      resolveReleaseContext({
+        eventName: 'workflow_dispatch',
+        ref: 'refs/tags/v1.2.3',
+        tag: 'v1.2.3'
+      }),
+    /Explicit --tag validation does not fetch GitHub Release notes/u
+  );
+});
+
+test('resolveReleaseContext supports explicit tag validation when release notes are skipped', async () => {
+  assert.deepEqual(
+    await resolveReleaseContext({
+      skipReleaseNotes: true,
+      tag: 'v1.2.3'
+    }),
+    {
+      releaseBody: '',
+      releaseNotesStatus: 'skipped by explicit tag override',
+      requireReleaseNotes: false,
+      tag: 'v1.2.3'
+    }
+  );
 });
 
 test('resolveReleaseContext reads release event tag and body', async () => {

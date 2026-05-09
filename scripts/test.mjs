@@ -27,7 +27,7 @@ async function findTestFiles(directory) {
 const testFiles = await findTestFiles(process.cwd());
 
 if (testFiles.length === 0) {
-  console.log('✅ Tests skipped: no test runner configured yet.');
+  console.log('✅ Tests skipped: no matching *.test.mjs or *.spec.mjs files found.');
   process.exit(0);
 }
 

@@ -156,11 +156,17 @@ export async function resolveReleaseContext({
   token = process.env.GITHUB_TOKEN
 } = {}) {
   if (tag) {
+    if (!skipReleaseNotes) {
+      throw new Error(
+        'Explicit --tag validation does not fetch GitHub Release notes. Re-run with --skip-release-notes after manually verifying release notes, or validate from a release/workflow_dispatch event.'
+      );
+    }
+
     return {
       tag,
       releaseBody: '',
-      requireReleaseNotes: !skipReleaseNotes,
-      releaseNotesStatus: skipReleaseNotes ? 'skipped' : 'not provided'
+      requireReleaseNotes: false,
+      releaseNotesStatus: 'skipped by explicit tag override'
     };
   }
 

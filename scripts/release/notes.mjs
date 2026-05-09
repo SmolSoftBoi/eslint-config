@@ -12,8 +12,95 @@ function runGit(args, cwd) {
   }).trim();
 }
 
+const numericIdentifierPattern = /^[0-9]+$/u;
+
+function compareNumbers(left, right) {
+  return Math.sign(left - right);
+}
+
+function parseComparableTag(tag) {
+  const { version } = parseReleaseTag(tag);
+  const [coreVersion, prereleaseVersion = ''] = version.split('-');
+  const [major, minor, patch] = coreVersion.split('.').map(Number);
+
+  return {
+    major,
+    minor,
+    patch,
+    prerelease: prereleaseVersion ? prereleaseVersion.split('.') : [],
+    tag
+  };
+}
+
+function comparePrereleaseIdentifiers(left, right) {
+  const leftIsNumeric = numericIdentifierPattern.test(left);
+  const rightIsNumeric = numericIdentifierPattern.test(right);
+
+  if (leftIsNumeric && rightIsNumeric) {
+    return compareNumbers(Number(left), Number(right));
+  }
+
+  if (leftIsNumeric) {
+    return -1;
+  }
+
+  if (rightIsNumeric) {
+    return 1;
+  }
+
+  return left.localeCompare(right);
+}
+
+function compareParsedTags(left, right) {
+  const coreComparison =
+    compareNumbers(left.major, right.major) ||
+    compareNumbers(left.minor, right.minor) ||
+    compareNumbers(left.patch, right.patch);
+
+  if (coreComparison !== 0) {
+    return coreComparison;
+  }
+
+  if (left.prerelease.length === 0 && right.prerelease.length === 0) {
+    return 0;
+  }
+
+  if (left.prerelease.length === 0) {
+    return 1;
+  }
+
+  if (right.prerelease.length === 0) {
+    return -1;
+  }
+
+  const length = Math.max(left.prerelease.length, right.prerelease.length);
+  for (let index = 0; index < length; index += 1) {
+    const leftIdentifier = left.prerelease[index];
+    const rightIdentifier = right.prerelease[index];
+
+    if (leftIdentifier === undefined) {
+      return -1;
+    }
+
+    if (rightIdentifier === undefined) {
+      return 1;
+    }
+
+    const identifierComparison = comparePrereleaseIdentifiers(leftIdentifier, rightIdentifier);
+    if (identifierComparison !== 0) {
+      return identifierComparison;
+    }
+  }
+
+  return 0;
+}
+
+function isStableTag(parsedTag) {
+  return parsedTag.prerelease.length === 0;
+}
+
 export function getSemverTags({ cwd = process.cwd(), run = runGit } = {}) {
-  const output = run(['tag', '--list', 'v*', '--sort=-v:refname'], cwd);
+  const output = run(['tag', '--list', 'v*'], cwd);
   return output
     .split('\n')
     .map((tag) => tag.trim())
@@ -25,11 +112,20 @@ export function getSemverTags({ cwd = process.cwd(), run = runGit } = {}) {
       } catch {
         return false;
       }
-    });
+    })
+    .sort((left, right) => compareParsedTags(parseComparableTag(right), parseComparableTag(left)));
 }
 
 export function getPreviousReleaseTag({ currentTag, cwd = process.cwd(), run = runGit } = {}) {
-  return getSemverTags({ cwd, run }).find((tag) => tag !== currentTag) ?? null;
+  const current = parseComparableTag(currentTag);
+  const candidates = getSemverTags({ cwd, run })
+    .filter((tag) => tag !== currentTag)
+    .map((tag) => parseComparableTag(tag))
+    .filter((candidate) => compareParsedTags(candidate, current) < 0)
+    .filter((candidate) => !isStableTag(current) || isStableTag(candidate))
+    .sort((left, right) => compareParsedTags(right, left));
+
+  return candidates[0]?.tag ?? null;
 }
 
 export function getCommitSubjects({ cwd = process.cwd(), fromTag = null, run = runGit } = {}) {

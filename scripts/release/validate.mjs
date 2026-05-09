@@ -6,14 +6,17 @@ import {
   resolveReleaseContext,
   validateReleaseFields
 } from './core.mjs';
+import { pathToFileURL } from 'node:url';
 
-function parseArgs(argv) {
+export function parseArgs(argv) {
   const args = {
     skipReleaseNotes: false,
     tag: null
   };
 
-  for (const arg of argv) {
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+
     if (arg === '--skip-release-notes' || arg === '--skip-release-notes=true') {
       args.skipReleaseNotes = true;
       continue;
@@ -21,6 +24,17 @@ function parseArgs(argv) {
 
     if (arg === '--skip-release-notes=false') {
       args.skipReleaseNotes = false;
+      continue;
+    }
+
+    if (arg === '--tag') {
+      const next = argv[index + 1];
+      if (!next || next.startsWith('-')) {
+        throw new Error('--tag option requires a value, e.g. --tag v1.2.3');
+      }
+
+      args.tag = next;
+      index += 1;
       continue;
     }
 
@@ -35,8 +49,8 @@ function parseArgs(argv) {
   return args;
 }
 
-try {
-  const args = parseArgs(process.argv.slice(2));
+export async function main(argv = process.argv.slice(2)) {
+  const args = parseArgs(argv);
   const pkg = await loadPackageJson();
   const context = await resolveReleaseContext({
     skipReleaseNotes: args.skipReleaseNotes,
@@ -69,11 +83,17 @@ try {
   console.log(
     `Release validation passed for ${result.packageName} ${result.tag}; npm dist-tag: ${result.npmDistTag}.`
   );
-} catch (error) {
-  const message = error instanceof Error ? error.message : String(error);
-  await appendGitHubSummary(
-    ['## Release validation', '', `- Validation: failed`, `- Error: ${message}`, ''].join('\n')
-  );
-  console.error(`release validation failed: ${message}`);
-  process.exit(1);
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  try {
+    await main();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    await appendGitHubSummary(
+      ['## Release validation', '', `- Validation: failed`, `- Error: ${message}`, ''].join('\n')
+    );
+    console.error(`release validation failed: ${message}`);
+    process.exit(1);
+  }
 }
