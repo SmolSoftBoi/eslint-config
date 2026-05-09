@@ -4,6 +4,7 @@ import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { execFile, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
+import os from 'node:os';
 import path from 'node:path';
 
 const execFileAsync = promisify(execFile);
@@ -252,7 +253,10 @@ function resolveNpmCommand() {
   const env = {
     ...process.env,
     COREPACK_ENABLE_PROJECT_SPEC: '0',
-    COREPACK_ENABLE_STRICT: '0'
+    COREPACK_ENABLE_STRICT: '0',
+    npm_config_dry_run: 'false',
+    npm_config_cache:
+      process.env.npm_config_cache ?? path.join(os.tmpdir(), 'eslint-config-npm-cache')
   };
 
   if (execPath && /\.(c?m?js)$/i.test(execPath)) {

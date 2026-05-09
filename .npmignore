@@ -19,6 +19,7 @@ coverage/
 # Packed tarballs
 
 *.tgz
+.release-notes/
 
 # OS / editor noise
 
@@ -35,6 +36,7 @@ specs/
 .codex/
 .specify/
 scripts/prerelease/
+scripts/release/
 .editorconfig
 .prettierignore
 .prettierrc.js
