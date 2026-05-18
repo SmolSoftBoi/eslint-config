@@ -39,7 +39,12 @@ export function parseArgs(argv) {
     }
 
     if (arg.startsWith('--tag=')) {
-      args.tag = arg.slice('--tag='.length);
+      const value = arg.slice('--tag='.length);
+      if (!value) {
+        throw new Error('--tag option requires a value, e.g. --tag=v1.2.3');
+      }
+
+      args.tag = value;
       continue;
     }
 

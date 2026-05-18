@@ -120,7 +120,7 @@ Publishing is **GitHub Release-driven**.
 
 ### ✅ Prerequisites
 
-- Configure the repository secret `NPM_TOKEN` with an npm automation token that has publish rights for `@smolpack/eslint-config`.
+- Configure the repository secret `NPM_TOKEN` with an npm automation token that has publishing rights for `@smolpack/eslint-config`.
 
 ### 🧭 Release flow
 

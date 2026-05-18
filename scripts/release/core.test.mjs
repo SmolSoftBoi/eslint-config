@@ -73,6 +73,7 @@ test('parseArgs accepts both release validation tag forms', () => {
 
 test('parseArgs rejects --tag without a value', () => {
   assert.throws(() => parseArgs(['--tag']), /--tag option requires a value/u);
+  assert.throws(() => parseArgs(['--tag=']), /--tag option requires a value/u);
 });
 
 test('resolveReleaseContext fails fast for explicit tag validation without release-note skip', async () => {
@@ -164,6 +165,7 @@ test('resolveReleaseContext fetches GitHub Release notes for manual dispatch', a
     'https://api.github.com/repos/SmolSoftBoi/eslint-config/releases/tags/v1.2.3'
   );
   assert.equal(calls[0].options.headers.Authorization, 'Bearer token');
+  assert.equal(calls[0].options.headers['X-GitHub-Api-Version'], '2026-03-10');
 });
 
 test('resolveReleaseContext only skips release-note lookup for manual override', async () => {
