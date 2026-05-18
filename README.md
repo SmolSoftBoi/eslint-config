@@ -147,7 +147,7 @@ Publishing is **GitHub Release-driven**.
 
    You can also create the release in the GitHub UI, but the release body must contain human-readable notes.
 
-4. GitHub Actions runs `.github/workflows/release.yml`, validates the tag, release notes, package version, package contents, and import smoke test, then publishes to npm.
+4. GitHub Actions runs `.github/workflows/release.yml`, validates the tag, release notes, package version, package contents, and import smoke test by default, then publishes to npm. For manual runs, `skip_release_notes=true` bypasses only the release-notes check.
 
 Stable versions publish to npm’s `latest` dist-tag. Prerelease versions publish to `next`, so release candidates do not replace the default install target.
 

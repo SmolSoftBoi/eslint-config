@@ -190,3 +190,50 @@ test('getPreviousReleaseTag uses the nearest previous tag for prereleases', asyn
     await rm(tempDir, { force: true, recursive: true });
   }
 });
+
+test('getPreviousReleaseTag preserves hyphenated prerelease identifiers', async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), 'hyphenated-prerelease-notes-'));
+
+  try {
+    git(tempDir, ['init']);
+    git(tempDir, ['config', 'user.email', 'test@example.com']);
+    git(tempDir, ['config', 'user.name', 'Release Test']);
+
+    await writeFile(
+      path.join(tempDir, 'package.json'),
+      JSON.stringify({
+        name: '@smolpack/eslint-config',
+        version: '1.1.0-alpha-b.3'
+      })
+    );
+    git(tempDir, ['add', 'package.json']);
+    git(tempDir, ['commit', '-m', 'Initial release']);
+    git(tempDir, ['tag', 'v1.0.0']);
+
+    await writeFile(path.join(tempDir, 'alpha-one.txt'), 'alpha-one\n');
+    git(tempDir, ['add', 'alpha-one.txt']);
+    git(tempDir, ['commit', '-m', 'First alpha-b prerelease']);
+    git(tempDir, ['tag', 'v1.1.0-alpha-b.1']);
+
+    await writeFile(path.join(tempDir, 'alpha-two.txt'), 'alpha-two\n');
+    git(tempDir, ['add', 'alpha-two.txt']);
+    git(tempDir, ['commit', '-m', 'Second alpha-b prerelease']);
+    git(tempDir, ['tag', 'v1.1.0-alpha-b.2']);
+
+    await writeFile(path.join(tempDir, 'alpha-three.txt'), 'alpha-three\n');
+    git(tempDir, ['add', 'alpha-three.txt']);
+    git(tempDir, ['commit', '-m', 'Third alpha-b prerelease']);
+
+    const result = await generateReleaseNotes({
+      cwd: tempDir,
+      version: '1.1.0-alpha-b.3'
+    });
+
+    assert.equal(result.previousTag, 'v1.1.0-alpha-b.2');
+    assert.match(result.notes, /- Third alpha-b prerelease/u);
+    assert.doesNotMatch(result.notes, /- First alpha-b prerelease/u);
+    assert.doesNotMatch(result.notes, /- Second alpha-b prerelease/u);
+  } finally {
+    await rm(tempDir, { force: true, recursive: true });
+  }
+});

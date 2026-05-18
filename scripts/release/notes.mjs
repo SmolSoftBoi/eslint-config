@@ -20,7 +20,11 @@ function compareNumbers(left, right) {
 
 function parseComparableTag(tag) {
   const { version } = parseReleaseTag(tag);
-  const [coreVersion, prereleaseVersion = ''] = version.split('-');
+  const prereleaseStartIndex = version.indexOf('-');
+  const coreVersion =
+    prereleaseStartIndex === -1 ? version : version.slice(0, prereleaseStartIndex);
+  const prereleaseVersion =
+    prereleaseStartIndex === -1 ? '' : version.slice(prereleaseStartIndex + 1);
   const [major, minor, patch] = coreVersion.split('.').map(Number);
 
   return {
