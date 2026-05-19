@@ -18,6 +18,20 @@ function compareNumbers(left, right) {
   return Math.sign(left - right);
 }
 
+function compareAscii(left, right) {
+  const length = Math.min(left.length, right.length);
+
+  for (let index = 0; index < length; index += 1) {
+    const characterComparison = compareNumbers(left.charCodeAt(index), right.charCodeAt(index));
+
+    if (characterComparison !== 0) {
+      return characterComparison;
+    }
+  }
+
+  return compareNumbers(left.length, right.length);
+}
+
 function parseComparableTag(tag) {
   const { version } = parseReleaseTag(tag);
   const prereleaseStartIndex = version.indexOf('-');
@@ -52,7 +66,7 @@ function comparePrereleaseIdentifiers(left, right) {
     return 1;
   }
 
-  return left.localeCompare(right);
+  return compareAscii(left, right);
 }
 
 function compareParsedTags(left, right) {

@@ -237,3 +237,44 @@ test('getPreviousReleaseTag preserves hyphenated prerelease identifiers', async 
     await rm(tempDir, { force: true, recursive: true });
   }
 });
+
+test('generateReleaseNotes compares prerelease identifiers with ASCII ordering', async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), 'ascii-prerelease-notes-'));
+
+  try {
+    git(tempDir, ['init']);
+    git(tempDir, ['config', 'user.email', 'test@example.com']);
+    git(tempDir, ['config', 'user.name', 'Release Test']);
+
+    await writeFile(
+      path.join(tempDir, 'package.json'),
+      JSON.stringify({
+        name: '@smolpack/eslint-config',
+        version: '1.2.3-rc.2'
+      })
+    );
+    git(tempDir, ['add', 'package.json']);
+    git(tempDir, ['commit', '-m', 'Initial release']);
+    git(tempDir, ['tag', 'v1.0.0']);
+
+    await writeFile(path.join(tempDir, 'upper-prerelease.txt'), 'upper-prerelease\n');
+    git(tempDir, ['add', 'upper-prerelease.txt']);
+    git(tempDir, ['commit', '-m', 'Uppercase prerelease baseline']);
+    git(tempDir, ['tag', 'v1.2.3-Z.1']);
+
+    await writeFile(path.join(tempDir, 'next-rc.txt'), 'next-rc\n');
+    git(tempDir, ['add', 'next-rc.txt']);
+    git(tempDir, ['commit', '-m', 'Next release candidate']);
+
+    const result = await generateReleaseNotes({
+      cwd: tempDir,
+      version: '1.2.3-rc.1'
+    });
+
+    assert.equal(result.previousTag, 'v1.2.3-Z.1');
+    assert.match(result.notes, /- Next release candidate/u);
+    assert.doesNotMatch(result.notes, /- Uppercase prerelease baseline/u);
+  } finally {
+    await rm(tempDir, { force: true, recursive: true });
+  }
+});
