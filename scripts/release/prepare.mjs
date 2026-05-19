@@ -2,7 +2,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { generateReleaseNotes } from './notes.mjs';
 import { isReleaseVersion, normalizeVersionInput, parseReleaseTag } from './core.mjs';
 
@@ -17,9 +17,9 @@ function runGit(args, { cwd = repoRoot } = {}) {
   }).trim();
 }
 
-function runOptionalGit(args) {
+function runOptionalGit(args, options) {
   try {
-    return runGit(args);
+    return runGit(args, options);
   } catch {
     return '';
   }
@@ -65,6 +65,20 @@ async function updatePackageVersion(version) {
   return { originalText, packagePath };
 }
 
+export async function restorePackageJson({
+  cwd = repoRoot,
+  originalText,
+  packagePath = path.join(cwd, 'package.json')
+}) {
+  const absolutePackagePath = path.isAbsolute(packagePath)
+    ? packagePath
+    : path.join(cwd, packagePath);
+  const packagePathspec = path.relative(cwd, absolutePackagePath) || path.basename(packagePath);
+
+  runOptionalGit(['reset', '--', packagePathspec], { cwd });
+  await writeFile(absolutePackagePath, originalText);
+}
+
 function runPrerelease() {
   const env = {
     ...process.env,
@@ -104,8 +118,8 @@ function printNextSteps({ notesPath, tag }) {
   console.log('   git reset --soft HEAD~1');
 }
 
-async function main() {
-  const version = normalizeVersionInput(process.argv[2]);
+async function main(argv = process.argv.slice(2)) {
+  const version = normalizeVersionInput(argv[0]);
   if (!isReleaseVersion(version)) {
     throw new Error(
       `Release version '${version}' is invalid. Use MAJOR.MINOR.PATCH with optional prerelease, e.g. 1.2.3 or 1.2.3-rc.1.`
@@ -138,15 +152,17 @@ async function main() {
     printNextSteps({ notesPath, tag });
   } catch (error) {
     if (!committed) {
-      await writeFile(packagePath, originalText);
+      await restorePackageJson({ originalText, packagePath });
     }
     throw error;
   }
 }
 
-try {
-  await main();
-} catch (error) {
-  console.error(error instanceof Error ? error.message : String(error));
-  process.exit(1);
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  try {
+    await main();
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exit(1);
+  }
 }
