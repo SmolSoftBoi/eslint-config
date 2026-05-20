@@ -48,10 +48,18 @@ function assertGitIdentityConfigured() {
   }
 }
 
-function assertTagDoesNotExist(tag) {
-  const existing = runGit(['tag', '--list', tag]);
-  if (existing) {
+export function assertTagDoesNotExist(tag, { cwd = repoRoot } = {}) {
+  const localExisting = runGit(['tag', '--list', tag], { cwd });
+  if (localExisting) {
     throw new Error(`Tag ${tag} already exists.`);
+  }
+
+  const remoteExisting = runOptionalGit(
+    ['ls-remote', '--tags', '--refs', 'origin', `refs/tags/${tag}`],
+    { cwd }
+  );
+  if (remoteExisting) {
+    throw new Error(`Tag ${tag} already exists on origin.`);
   }
 }
 
