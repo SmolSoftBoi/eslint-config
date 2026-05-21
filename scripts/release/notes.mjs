@@ -261,9 +261,16 @@ export function parseArgs(argv) {
       continue;
     }
 
+    if (arg.startsWith('-')) {
+      throw new Error(`Unknown option ${arg}.`);
+    }
+
     if (!args.version) {
       args.version = arg;
+      continue;
     }
+
+    throw new Error(`Unexpected argument ${arg}.`);
   }
 
   return args;

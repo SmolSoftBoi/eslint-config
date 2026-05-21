@@ -115,6 +115,30 @@ test('parseArgs requires values for release notes options', () => {
   );
 });
 
+test('parseArgs accepts supported release notes options', () => {
+  assert.deepEqual(parseArgs(['1.2.3']), {
+    outputPath: null,
+    version: '1.2.3'
+  });
+  assert.deepEqual(parseArgs(['--version', '1.2.3']), {
+    outputPath: null,
+    version: '1.2.3'
+  });
+  assert.deepEqual(parseArgs(['--output', 'notes.md']), {
+    outputPath: 'notes.md',
+    version: null
+  });
+  assert.deepEqual(parseArgs(['1.2.3', '--output', 'notes.md']), {
+    outputPath: 'notes.md',
+    version: '1.2.3'
+  });
+});
+
+test('parseArgs rejects unknown options and unexpected extra arguments', () => {
+  assert.throws(() => parseArgs(['--outpu', 'notes.md']), /Unknown option --outpu\./u);
+  assert.throws(() => parseArgs(['1.2.3', 'extra']), /Unexpected argument extra\./u);
+});
+
 test('notes module import is safe when process argv script path is unset', () => {
   const moduleUrl = pathToFileURL(path.resolve('scripts/release/notes.mjs')).href;
 

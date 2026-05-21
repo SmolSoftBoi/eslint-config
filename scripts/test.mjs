@@ -24,7 +24,7 @@ async function findTestFiles(directory) {
   return files;
 }
 
-const testFiles = await findTestFiles(process.cwd());
+const testFiles = (await findTestFiles(process.cwd())).sort();
 
 if (testFiles.length === 0) {
   console.log('✅ Tests skipped: no matching *.test.mjs or *.spec.mjs files found.');
