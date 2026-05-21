@@ -54,10 +54,16 @@ export function assertTagDoesNotExist(tag, { cwd = repoRoot } = {}) {
     throw new Error(`Tag ${tag} already exists.`);
   }
 
-  const remoteExisting = runOptionalGit(
-    ['ls-remote', '--tags', '--refs', 'origin', `refs/tags/${tag}`],
-    { cwd }
-  );
+  const remoteExisting = (() => {
+    try {
+      return runGit(['ls-remote', '--tags', '--refs', 'origin', `refs/tags/${tag}`], {
+        cwd
+      });
+    } catch {
+      throw new Error('Unable to verify tags on origin. Check remote access and try again.');
+    }
+  })();
+
   if (remoteExisting) {
     throw new Error(`Tag ${tag} already exists on origin.`);
   }

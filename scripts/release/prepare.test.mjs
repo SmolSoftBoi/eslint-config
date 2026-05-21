@@ -95,3 +95,18 @@ test('assertTagDoesNotExist rejects existing origin tags', async () => {
     await rm(tempDir, { force: true, recursive: true });
   }
 });
+
+test('assertTagDoesNotExist rejects unverifiable origin tags', async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), 'release-prepare-missing-origin-'));
+
+  try {
+    git(tempDir, ['init']);
+
+    assert.throws(
+      () => assertTagDoesNotExist('v1.2.3', { cwd: tempDir }),
+      /Unable to verify tags on origin\. Check remote access and try again\./u
+    );
+  } finally {
+    await rm(tempDir, { force: true, recursive: true });
+  }
+});
