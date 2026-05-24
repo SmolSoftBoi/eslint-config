@@ -5,7 +5,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/SmolSoftBoi/eslint-config.git"
+    "url": "git+https://github.com/SmolSoftBoi/eslint-config.git"
   },
   "type": "module",
   "main": "index.mjs",
@@ -19,6 +19,9 @@
     "smoke:import": "node ./scripts/prerelease/smoke-import.mjs",
     "smoke:pack": "bash ./scripts/smoke-import-packed.sh",
     "prerelease": "yarn preflight && yarn pack:check && yarn smoke:import",
+    "release:validate": "node ./scripts/release/validate.mjs",
+    "release:notes": "node ./scripts/release/notes.mjs",
+    "release:prepare": "node ./scripts/release/prepare.mjs",
     "prepublishOnly": "yarn prerelease"
   },
   "keywords": [

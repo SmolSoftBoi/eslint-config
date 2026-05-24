@@ -114,18 +114,50 @@ This repo uses **ShellCheck** to lint repository-tracked `*.sh` scripts.
 
 - Avoid global disables in `.shellcheckrc`.
 
-## Releasing
+## 🚀 Releasing
 
 Publishing is **GitHub Release-driven**.
 
-### Prerequisites
+### ✅ Prerequisites
 
-- Configure the repository secret `NPM_TOKEN` with an npm automation token that has publish rights for `@smolpack/eslint-config`.
+- Configure the repository secret `NPM_TOKEN` with an npm automation token that has publishing rights for `@smolpack/eslint-config`.
 
-### Release flow
+### 🧭 Release flow
 
-1. Bump `package.json#version` and commit.
-2. Run `yarn prerelease` locally to validate linting, packaging, and import smoke tests.
-3. Create a semver tag like `vX.Y.Z` (or prerelease `vX.Y.Z-rc.1`) pointing at that commit.
-4. Create a GitHub Release for that tag and include human-readable release notes.
-5. GitHub Actions runs `.github/workflows/release.yml` to validate and publish.
+1. Prepare the local release commit, tag, and notes:
+
+   ```bash
+   yarn release:prepare 1.2.3
+   ```
+
+   Use prerelease versions such as `1.2.3-rc.1` when needed. The helper updates `package.json`, runs `yarn prerelease`, creates `Release vX.Y.Z`, creates an annotated `vX.Y.Z` tag, and writes notes to `.release-notes/vX.Y.Z.md`.
+
+2. Push the release commit and tag:
+
+   ```bash
+   git push origin HEAD
+   git push origin v1.2.3
+   ```
+
+3. Create the GitHub Release using the generated notes:
+
+   ```bash
+   gh release create v1.2.3 --notes-file .release-notes/v1.2.3.md
+   ```
+
+   You can also create the release in the GitHub UI, but the release body must contain human-readable notes.
+
+4. GitHub Actions runs `.github/workflows/release.yml`, validates the tag, release notes, package version, package contents, and import smoke test by default, then publishes to npm. For manual runs, `skip_release_notes=true` bypasses only the release-notes check.
+
+Stable versions publish to npm’s `latest` dist-tag. Prerelease versions publish to `next`, so release candidates do not replace the default install target.
+
+### 🧯 Local rollback
+
+If you have not pushed the release commit or tag yet, roll back with:
+
+```bash
+git tag -d v1.2.3
+git reset --soft HEAD~1
+```
+
+After pushing, avoid rewriting public history. Fix problems with a follow-up release.
