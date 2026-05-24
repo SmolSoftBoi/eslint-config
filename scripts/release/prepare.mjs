@@ -93,6 +93,16 @@ export async function restorePackageJson({
   await writeFile(absolutePackagePath, originalText);
 }
 
+export function rollbackReleaseCommitIfTagMissing(tag, { cwd = repoRoot } = {}) {
+  const existingTag = runGit(['tag', '--list', tag], { cwd });
+  if (existingTag) {
+    return false;
+  }
+
+  runGit(['reset', '--soft', 'HEAD~1'], { cwd });
+  return true;
+}
+
 function runPrerelease() {
   const env = {
     ...process.env,
@@ -165,7 +175,7 @@ async function main(argv = process.argv.slice(2)) {
 
     printNextSteps({ notesPath, tag });
   } catch (error) {
-    if (!committed) {
+    if (!committed || rollbackReleaseCommitIfTagMissing(tag)) {
       await restorePackageJson({ originalText, packagePath });
     }
     throw error;

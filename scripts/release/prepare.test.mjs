@@ -4,7 +4,11 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { assertTagDoesNotExist, restorePackageJson } from './prepare.mjs';
+import {
+  assertTagDoesNotExist,
+  restorePackageJson,
+  rollbackReleaseCommitIfTagMissing
+} from './prepare.mjs';
 
 function git(cwd, args) {
   return execFileSync('git', args, {
@@ -39,6 +43,71 @@ test('restorePackageJson unstages and restores package.json', async () => {
     });
 
     assert.equal(await readFile(packagePath, 'utf8'), originalText);
+    assert.equal(git(tempDir, ['status', '--porcelain']), '');
+  } finally {
+    await rm(tempDir, { force: true, recursive: true });
+  }
+});
+
+test('rollbackReleaseCommitIfTagMissing soft-resets the release commit before package restore', async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), 'release-prepare-tag-failure-'));
+  const packagePath = path.join(tempDir, 'package.json');
+  const originalText = `${JSON.stringify({ name: 'test-package', version: '1.0.0' }, null, 2)}\n`;
+  const bumpedText = `${JSON.stringify({ name: 'test-package', version: '1.1.0' }, null, 2)}\n`;
+
+  try {
+    git(tempDir, ['init']);
+    git(tempDir, ['config', 'user.email', 'test@example.com']);
+    git(tempDir, ['config', 'user.name', 'Release Test']);
+
+    await writeFile(packagePath, originalText);
+    git(tempDir, ['add', 'package.json']);
+    git(tempDir, ['commit', '-m', 'Initial release']);
+    const originalHead = git(tempDir, ['rev-parse', 'HEAD']);
+
+    await writeFile(packagePath, bumpedText);
+    git(tempDir, ['add', 'package.json']);
+    git(tempDir, ['commit', '-m', 'Release v1.1.0']);
+
+    assert.equal(rollbackReleaseCommitIfTagMissing('v1.1.0', { cwd: tempDir }), true);
+    assert.equal(git(tempDir, ['rev-parse', 'HEAD']), originalHead);
+
+    await restorePackageJson({
+      cwd: tempDir,
+      originalText,
+      packagePath
+    });
+
+    assert.equal(await readFile(packagePath, 'utf8'), originalText);
+    assert.equal(git(tempDir, ['status', '--porcelain']), '');
+  } finally {
+    await rm(tempDir, { force: true, recursive: true });
+  }
+});
+
+test('rollbackReleaseCommitIfTagMissing keeps the release commit when the tag exists', async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), 'release-prepare-tag-present-'));
+  const packagePath = path.join(tempDir, 'package.json');
+  const originalText = `${JSON.stringify({ name: 'test-package', version: '1.0.0' }, null, 2)}\n`;
+  const bumpedText = `${JSON.stringify({ name: 'test-package', version: '1.1.0' }, null, 2)}\n`;
+
+  try {
+    git(tempDir, ['init']);
+    git(tempDir, ['config', 'user.email', 'test@example.com']);
+    git(tempDir, ['config', 'user.name', 'Release Test']);
+
+    await writeFile(packagePath, originalText);
+    git(tempDir, ['add', 'package.json']);
+    git(tempDir, ['commit', '-m', 'Initial release']);
+
+    await writeFile(packagePath, bumpedText);
+    git(tempDir, ['add', 'package.json']);
+    git(tempDir, ['commit', '-m', 'Release v1.1.0']);
+    const releaseHead = git(tempDir, ['rev-parse', 'HEAD']);
+    git(tempDir, ['tag', 'v1.1.0']);
+
+    assert.equal(rollbackReleaseCommitIfTagMissing('v1.1.0', { cwd: tempDir }), false);
+    assert.equal(git(tempDir, ['rev-parse', 'HEAD']), releaseHead);
     assert.equal(git(tempDir, ['status', '--porcelain']), '');
   } finally {
     await rm(tempDir, { force: true, recursive: true });
