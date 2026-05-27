@@ -5,6 +5,10 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { generateReleaseNotes } from './notes.mjs';
 import { isReleaseVersion, normalizeVersionInput, parseReleaseTag } from './core.mjs';
+import {
+  formatReleaseVersionRecommendation,
+  getReleaseVersionRecommendation
+} from './recommend.mjs';
 
 const scriptsDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptsDir, '../..');
@@ -25,23 +29,23 @@ function runOptionalGit(args, options) {
   }
 }
 
-function runGitInherited(args) {
+function runGitInherited(args, { cwd = repoRoot } = {}) {
   execFileSync('git', args, {
-    cwd: repoRoot,
+    cwd,
     stdio: 'inherit'
   });
 }
 
-function assertCleanWorkingTree() {
-  const status = runGit(['status', '--porcelain']);
+function assertCleanWorkingTree({ cwd = repoRoot } = {}) {
+  const status = runGit(['status', '--porcelain'], { cwd });
   if (status) {
     throw new Error('Working tree must be clean before preparing a release.');
   }
 }
 
-function assertGitIdentityConfigured() {
-  const name = runOptionalGit(['config', '--get', 'user.name']);
-  const email = runOptionalGit(['config', '--get', 'user.email']);
+function assertGitIdentityConfigured({ cwd = repoRoot } = {}) {
+  const name = runOptionalGit(['config', '--get', 'user.name'], { cwd });
+  const email = runOptionalGit(['config', '--get', 'user.email'], { cwd });
 
   if (!name || !email) {
     throw new Error('Git user.name and user.email must be configured before creating a release commit.');
@@ -69,8 +73,8 @@ export function assertTagDoesNotExist(tag, { cwd = repoRoot } = {}) {
   }
 }
 
-async function updatePackageVersion(version) {
-  const packagePath = path.join(repoRoot, 'package.json');
+async function updatePackageVersion(version, { cwd = repoRoot } = {}) {
+  const packagePath = path.join(cwd, 'package.json');
   const originalText = await readFile(packagePath, 'utf8');
   const pkg = JSON.parse(originalText);
   pkg.version = version;
@@ -103,7 +107,7 @@ export function rollbackReleaseCommitIfTagMissing(tag, { cwd = repoRoot } = {}) 
   return true;
 }
 
-function runPrerelease() {
+function runPrerelease({ cwd = repoRoot } = {}) {
   const env = {
     ...process.env,
     npm_config_cache:
@@ -111,7 +115,7 @@ function runPrerelease() {
   };
 
   const result = spawnSync('yarn', ['prerelease'], {
-    cwd: repoRoot,
+    cwd,
     env,
     stdio: 'inherit'
   });
@@ -125,24 +129,30 @@ function runPrerelease() {
   }
 }
 
-function printNextSteps({ notesPath, tag }) {
-  console.log('');
-  console.log(`Prepared ${tag}.`);
-  console.log('');
-  console.log('Next steps:');
-  console.log('1. Push the release commit:');
-  console.log('   git push origin HEAD');
-  console.log('2. Push the release tag:');
-  console.log(`   git push origin ${tag}`);
-  console.log('3. Create the GitHub Release with the generated notes:');
-  console.log(`   gh release create ${tag} --notes-file ${notesPath}`);
-  console.log('');
-  console.log('Rollback before pushing:');
-  console.log(`   git tag -d ${tag}`);
-  console.log('   git reset --soft HEAD~1');
+function printNextSteps({ log = console.log, notesPath, tag }) {
+  log('');
+  log(`Prepared ${tag}.`);
+  log('');
+  log('Next steps:');
+  log('1. Push the release commit:');
+  log('   git push origin HEAD');
+  log('2. Push the release tag:');
+  log(`   git push origin ${tag}`);
+  log('3. Create the GitHub Release with the generated notes:');
+  log(`   gh release create ${tag} --notes-file ${notesPath}`);
+  log('');
+  log('Rollback before pushing:');
+  log(`   git tag -d ${tag}`);
+  log('   git reset --soft HEAD~1');
 }
 
-async function main(argv = process.argv.slice(2)) {
+export async function main(argv = process.argv.slice(2), { cwd = repoRoot, log = console.log } = {}) {
+  if (typeof argv[0] !== 'string' || !argv[0].trim()) {
+    const recommendation = await getReleaseVersionRecommendation({ cwd });
+    log(formatReleaseVersionRecommendation(recommendation));
+    return;
+  }
+
   const version = normalizeVersionInput(argv[0]);
   if (!isReleaseVersion(version)) {
     throw new Error(
@@ -154,29 +164,29 @@ async function main(argv = process.argv.slice(2)) {
   parseReleaseTag(tag);
   let committed = false;
 
-  assertCleanWorkingTree();
-  assertGitIdentityConfigured();
-  assertTagDoesNotExist(tag);
+  assertCleanWorkingTree({ cwd });
+  assertGitIdentityConfigured({ cwd });
+  assertTagDoesNotExist(tag, { cwd });
 
-  const { originalText, packagePath } = await updatePackageVersion(version);
+  const { originalText, packagePath } = await updatePackageVersion(version, { cwd });
 
   try {
-    runPrerelease();
+    runPrerelease({ cwd });
 
     const notesDir = '.release-notes';
     const notesPath = `${notesDir}/${tag}.md`;
-    await mkdir(path.join(repoRoot, notesDir), { recursive: true });
-    await generateReleaseNotes({ cwd: repoRoot, outputPath: notesPath, version });
+    await mkdir(path.join(cwd, notesDir), { recursive: true });
+    await generateReleaseNotes({ cwd, outputPath: notesPath, version });
 
-    runGitInherited(['add', 'package.json']);
-    runGitInherited(['commit', '-m', `Release ${tag}`]);
+    runGitInherited(['add', 'package.json'], { cwd });
+    runGitInherited(['commit', '-m', `Release ${tag}`], { cwd });
     committed = true;
-    runGitInherited(['tag', '-a', tag, '-m', `Release ${tag}`]);
+    runGitInherited(['tag', '-a', tag, '-m', `Release ${tag}`], { cwd });
 
-    printNextSteps({ notesPath, tag });
+    printNextSteps({ log, notesPath, tag });
   } catch (error) {
-    if (!committed || rollbackReleaseCommitIfTagMissing(tag)) {
-      await restorePackageJson({ originalText, packagePath });
+    if (!committed || rollbackReleaseCommitIfTagMissing(tag, { cwd })) {
+      await restorePackageJson({ cwd, originalText, packagePath });
     }
     throw error;
   }
