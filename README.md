@@ -124,7 +124,15 @@ Publishing is **GitHub Release-driven**.
 
 ### 🧭 Release flow
 
-1. Prepare the local release commit, tag, and notes:
+1. Ask the helper for the recommended next version:
+
+   ```bash
+   yarn release:prepare
+   ```
+
+   The helper inspects commits since the latest release tag, recommends the next version, and prints patch, minor, major, and release-candidate alternatives. It does not change files until you pass a version explicitly.
+
+2. Prepare the local release commit, tag, and notes:
 
    ```bash
    yarn release:prepare 1.2.3
@@ -132,14 +140,14 @@ Publishing is **GitHub Release-driven**.
 
    Use prerelease versions such as `1.2.3-rc.1` when needed. The helper updates `package.json`, runs `yarn prerelease`, creates `Release vX.Y.Z`, creates an annotated `vX.Y.Z` tag, and writes notes to `.release-notes/vX.Y.Z.md`.
 
-2. Push the release commit and tag:
+3. Push the release commit and tag:
 
    ```bash
    git push origin HEAD
    git push origin v1.2.3
    ```
 
-3. Create the GitHub Release using the generated notes:
+4. Create the GitHub Release using the generated notes:
 
    ```bash
    gh release create v1.2.3 --notes-file .release-notes/v1.2.3.md
@@ -147,7 +155,7 @@ Publishing is **GitHub Release-driven**.
 
    You can also create the release in the GitHub UI, but the release body must contain human-readable notes.
 
-4. GitHub Actions runs `.github/workflows/release.yml`, validates the tag, release notes, package version, package contents, and import smoke test by default, then publishes to npm. For manual runs, `skip_release_notes=true` bypasses only the release-notes check.
+5. GitHub Actions runs `.github/workflows/release.yml`, validates the tag, release notes, package version, package contents, and import smoke test by default, then publishes to npm. For manual runs, `skip_release_notes=true` bypasses only the release-notes check.
 
 Stable versions publish to npm’s `latest` dist-tag. Prerelease versions publish to `next`, so release candidates do not replace the default install target.
 
