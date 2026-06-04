@@ -294,7 +294,7 @@ export async function getReleaseVersionRecommendation({
     latestStableTag,
     packageVersion: pkg.version
   });
-  const sourceLabel = latestSemverTag ?? 'the current repository state';
+  const sourceLabel = latestSemverTag ?? 'the start of the repository history';
   const sourceRange = latestSemverTag ? `${latestSemverTag}..HEAD` : 'HEAD';
   const commits = getReleaseCommits({ cwd, fromTag: latestSemverTag, run });
   const { bump, reason } = deriveRecommendedBump({ commits, sourceLabel });

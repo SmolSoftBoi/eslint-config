@@ -27,7 +27,10 @@ async function createReleaseRepo({ packageVersion = '1.0.2', tag = 'v1.0.2' } = 
   );
   git(tempDir, ['add', 'package.json']);
   git(tempDir, ['commit', '-m', 'Initial release']);
-  git(tempDir, ['tag', tag]);
+
+  if (tag) {
+    git(tempDir, ['tag', tag]);
+  }
 
   return tempDir;
 }
@@ -88,6 +91,27 @@ test('getReleaseVersionRecommendation recommends minor for feat commits', async 
     assert.equal(recommendation.recommendedBump, 'minor');
     assert.equal(recommendation.recommendedVersion, '1.1.0');
     assert.equal(recommendation.alternatives.releaseCandidate, '1.1.0-rc.1');
+  } finally {
+    await rm(tempDir, { force: true, recursive: true });
+  }
+});
+
+test('getReleaseVersionRecommendation describes no-tag history clearly', async () => {
+  const tempDir = await createReleaseRepo({ packageVersion: '1.0.0', tag: null });
+
+  try {
+    await commitChange(tempDir, {
+      filename: 'first-feature.txt',
+      subject: 'feat: add first feature'
+    });
+
+    const recommendation = await getReleaseVersionRecommendation({ cwd: tempDir });
+
+    assert.equal(recommendation.recommendedBump, 'minor');
+    assert.equal(recommendation.recommendedVersion, '1.1.0');
+    assert.equal(recommendation.sourceRange, 'HEAD');
+    assert.match(recommendation.reason, /since the start of the repository history/u);
+    assert.doesNotMatch(recommendation.reason, /current repository state/u);
   } finally {
     await rm(tempDir, { force: true, recursive: true });
   }
