@@ -29,7 +29,7 @@
     "eslintconfig"
   ],
   "dependencies": {
-    "typescript-eslint": "^8.59.4"
+    "typescript-eslint": "^8.61.0"
   },
   "peerDependencies": {
     "@eslint/js": ">=9.17.0 <11",
