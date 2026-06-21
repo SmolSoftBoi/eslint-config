@@ -1,7 +1,14 @@
 import { execFileSync } from 'node:child_process';
-import { loadPackageJson, parseReleaseTag } from './core.mjs';
+import {
+  compareParsedReleaseVersions,
+  getSemverReleaseTags as getCoreSemverReleaseTags,
+  isStableReleaseVersion,
+  loadPackageJson,
+  parseComparableReleaseTag,
+  parseComparableReleaseVersion
+} from './core.mjs';
 
-const numericIdentifierPattern = /^[0-9]+$/u;
+const rcNumberPattern = /^[0-9]+$/u;
 const breakingChangeFooterPattern = /^BREAKING[ -]CHANGE:/mu;
 const conventionalBreakingSubjectPattern = /^[a-z][a-z0-9-]*(?:\([^)]+\))?!:/iu;
 const conventionalFeatureSubjectPattern = /^feat(?:\([^)]+\))?!?:/u;
@@ -14,123 +21,12 @@ function runGit(args, cwd) {
   }).trim();
 }
 
-function compareNumbers(left, right) {
-  return Math.sign(left - right);
-}
-
-function compareAscii(left, right) {
-  const length = Math.min(left.length, right.length);
-
-  for (let index = 0; index < length; index += 1) {
-    const characterComparison = compareNumbers(left.charCodeAt(index), right.charCodeAt(index));
-
-    if (characterComparison !== 0) {
-      return characterComparison;
-    }
-  }
-
-  return compareNumbers(left.length, right.length);
-}
-
-function parseComparableVersion(version) {
-  const normalizedVersion = parseReleaseTag(version.startsWith('v') ? version : `v${version}`)
-    .version;
-  const prereleaseStartIndex = normalizedVersion.indexOf('-');
-  const coreVersion =
-    prereleaseStartIndex === -1
-      ? normalizedVersion
-      : normalizedVersion.slice(0, prereleaseStartIndex);
-  const prereleaseVersion =
-    prereleaseStartIndex === -1 ? '' : normalizedVersion.slice(prereleaseStartIndex + 1);
-  const [major, minor, patch] = coreVersion.split('.').map(Number);
-
-  if (![major, minor, patch].every(Number.isInteger)) {
-    throw new Error(`Release version '${version}' is invalid.`);
-  }
-
-  return {
-    coreVersion,
-    major,
-    minor,
-    patch,
-    prerelease: prereleaseVersion ? prereleaseVersion.split('.') : [],
-    version: normalizedVersion
-  };
-}
-
-function comparePrereleaseIdentifiers(left, right) {
-  const leftIsNumeric = numericIdentifierPattern.test(left);
-  const rightIsNumeric = numericIdentifierPattern.test(right);
-
-  if (leftIsNumeric && rightIsNumeric) {
-    return compareNumbers(Number(left), Number(right));
-  }
-
-  if (leftIsNumeric) {
-    return -1;
-  }
-
-  if (rightIsNumeric) {
-    return 1;
-  }
-
-  return compareAscii(left, right);
-}
-
-function compareParsedVersions(left, right) {
-  const coreComparison =
-    compareNumbers(left.major, right.major) ||
-    compareNumbers(left.minor, right.minor) ||
-    compareNumbers(left.patch, right.patch);
-
-  if (coreComparison !== 0) {
-    return coreComparison;
-  }
-
-  if (left.prerelease.length === 0 && right.prerelease.length === 0) {
-    return 0;
-  }
-
-  if (left.prerelease.length === 0) {
-    return 1;
-  }
-
-  if (right.prerelease.length === 0) {
-    return -1;
-  }
-
-  const length = Math.max(left.prerelease.length, right.prerelease.length);
-  for (let index = 0; index < length; index += 1) {
-    const leftIdentifier = left.prerelease[index];
-    const rightIdentifier = right.prerelease[index];
-
-    if (leftIdentifier === undefined) {
-      return -1;
-    }
-
-    if (rightIdentifier === undefined) {
-      return 1;
-    }
-
-    const identifierComparison = comparePrereleaseIdentifiers(leftIdentifier, rightIdentifier);
-    if (identifierComparison !== 0) {
-      return identifierComparison;
-    }
-  }
-
-  return 0;
-}
-
-function isStableVersion(parsedVersion) {
-  return parsedVersion.prerelease.length === 0;
-}
-
 function formatCoreVersion({ major, minor, patch }) {
   return `${major}.${minor}.${patch}`;
 }
 
 function incrementVersion(version, bump) {
-  const parsedVersion = parseComparableVersion(version);
+  const parsedVersion = parseComparableReleaseVersion(version);
 
   if (bump === 'major') {
     return `${parsedVersion.major + 1}.0.0`;
@@ -145,29 +41,29 @@ function incrementVersion(version, bump) {
 
 function getLatestStableTag(tags) {
   return tags
-    .map((tag) => ({ parsedTag: parseComparableVersion(tag), tag }))
-    .filter(({ parsedTag }) => isStableVersion(parsedTag))
-    .sort((left, right) => compareParsedVersions(right.parsedTag, left.parsedTag))[0]?.tag;
+    .map((tag) => parseComparableReleaseTag(tag))
+    .filter((parsedTag) => isStableReleaseVersion(parsedTag))
+    .sort((left, right) => compareParsedReleaseVersions(right, left))[0]?.tag;
 }
 
 function getLatestSemverTag(tags) {
   return tags
-    .map((tag) => ({ parsedTag: parseComparableVersion(tag), tag }))
-    .sort((left, right) => compareParsedVersions(right.parsedTag, left.parsedTag))[0]?.tag;
+    .map((tag) => parseComparableReleaseTag(tag))
+    .sort((left, right) => compareParsedReleaseVersions(right, left))[0]?.tag;
 }
 
 function getBaseVersion({ latestStableTag, packageVersion }) {
-  const parsedPackageVersion = parseComparableVersion(packageVersion);
+  const parsedPackageVersion = parseComparableReleaseVersion(packageVersion);
   const packageCoreVersion = formatCoreVersion(parsedPackageVersion);
 
   if (!latestStableTag) {
     return packageCoreVersion;
   }
 
-  const latestStableVersion = parseReleaseTag(latestStableTag).version;
-  return compareParsedVersions(
-    parseComparableVersion(packageCoreVersion),
-    parseComparableVersion(latestStableVersion)
+  const latestStableVersion = parseComparableReleaseTag(latestStableTag).version;
+  return compareParsedReleaseVersions(
+    parseComparableReleaseVersion(packageCoreVersion),
+    parseComparableReleaseVersion(latestStableVersion)
   ) >= 0
     ? packageCoreVersion
     : latestStableVersion;
@@ -178,14 +74,14 @@ function getStableVersionForLatestPrerelease({ baseVersion, latestSemverTag }) {
     return null;
   }
 
-  const latestSemverVersion = parseComparableVersion(latestSemverTag);
-  if (isStableVersion(latestSemverVersion)) {
+  const latestSemverVersion = parseComparableReleaseTag(latestSemverTag);
+  if (isStableReleaseVersion(latestSemverVersion)) {
     return null;
   }
 
-  const stableCandidate = parseComparableVersion(latestSemverVersion.coreVersion);
-  const base = parseComparableVersion(baseVersion);
-  return compareParsedVersions(stableCandidate, base) >= 0 ? stableCandidate.version : null;
+  const stableCandidate = parseComparableReleaseVersion(latestSemverVersion.coreVersion);
+  const base = parseComparableReleaseVersion(baseVersion);
+  return compareParsedReleaseVersions(stableCandidate, base) >= 0 ? stableCandidate.version : null;
 }
 
 function parseReleaseCommitRecord(record) {
@@ -247,10 +143,10 @@ function deriveRecommendedBump({ commits, sourceLabel }) {
 }
 
 function getNextRcVersion({ stableVersion, tags }) {
-  const target = parseComparableVersion(stableVersion);
+  const target = parseComparableReleaseVersion(stableVersion);
   const nextRcNumber =
     tags
-      .map((tag) => parseComparableVersion(tag))
+      .map((tag) => parseComparableReleaseTag(tag))
       .filter(
         (version) =>
           version.major === target.major &&
@@ -258,7 +154,7 @@ function getNextRcVersion({ stableVersion, tags }) {
           version.patch === target.patch &&
           version.prerelease.length === 2 &&
           version.prerelease[0] === 'rc' &&
-          numericIdentifierPattern.test(version.prerelease[1])
+          rcNumberPattern.test(version.prerelease[1])
       )
       .map((version) => Number(version.prerelease[1]))
       .sort((left, right) => right - left)[0] ?? 0;
@@ -267,19 +163,7 @@ function getNextRcVersion({ stableVersion, tags }) {
 }
 
 export function getSemverReleaseTags({ cwd = process.cwd(), run = runGit } = {}) {
-  const output = run(['tag', '--list', 'v*'], cwd);
-  return output
-    .split('\n')
-    .map((tag) => tag.trim())
-    .filter(Boolean)
-    .filter((tag) => {
-      try {
-        parseReleaseTag(tag);
-        return true;
-      } catch {
-        return false;
-      }
-    });
+  return getCoreSemverReleaseTags({ cwd, run });
 }
 
 export async function getReleaseVersionRecommendation({

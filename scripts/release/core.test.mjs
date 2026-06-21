@@ -4,6 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import {
+  getSemverReleaseTags,
   getNpmDistTagForVersion,
   parseReleaseTag,
   resolveReleaseContext,
@@ -57,6 +58,23 @@ test('validateReleaseFields rejects empty release notes when required', () => {
 test('getNpmDistTagForVersion maps stable releases to latest and prereleases to next', () => {
   assert.equal(getNpmDistTagForVersion('1.2.3'), 'latest');
   assert.equal(getNpmDistTagForVersion('1.2.3-rc.1'), 'next');
+});
+
+test('getSemverReleaseTags filters and sorts release tags by semver precedence', () => {
+  assert.deepEqual(
+    getSemverReleaseTags({
+      run: () =>
+        [
+          'v1.0.0',
+          'not-a-release',
+          'v1.0.2-rc.1',
+          'v1.0.10',
+          'v1.0.2',
+          'v1.0.2-rc.2'
+        ].join('\n')
+    }),
+    ['v1.0.10', 'v1.0.2', 'v1.0.2-rc.2', 'v1.0.2-rc.1', 'v1.0.0']
+  );
 });
 
 test('parseArgs accepts both release validation tag forms', () => {
