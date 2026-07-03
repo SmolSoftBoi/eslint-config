@@ -1,6 +1,8 @@
 import { appendFile, readFile } from 'node:fs/promises';
 import path from 'node:path';
 
+const numericIdentifierPattern = /^[0-9]+$/u;
+
 export const releaseTagPattern =
   /^v(?<version>[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?)$/;
 
@@ -36,6 +38,152 @@ export function parseReleaseTag(tag) {
     tag: tag.trim(),
     version: match.groups.version
   };
+}
+
+function compareNumbers(left, right) {
+  return Math.sign(left - right);
+}
+
+function compareAscii(left, right) {
+  const length = Math.min(left.length, right.length);
+
+  for (let index = 0; index < length; index += 1) {
+    const characterComparison = compareNumbers(left.charCodeAt(index), right.charCodeAt(index));
+
+    if (characterComparison !== 0) {
+      return characterComparison;
+    }
+  }
+
+  return compareNumbers(left.length, right.length);
+}
+
+export function parseComparableReleaseVersion(value) {
+  if (typeof value !== 'string' || !value.trim()) {
+    throw new Error('Release version is required.');
+  }
+
+  const trimmed = value.trim();
+  const normalizedVersion = trimmed.startsWith('v') ? parseReleaseTag(trimmed).version : trimmed;
+
+  if (!isReleaseVersion(normalizedVersion)) {
+    throw new Error(`Release version '${value}' is invalid.`);
+  }
+
+  const prereleaseStartIndex = normalizedVersion.indexOf('-');
+  const coreVersion =
+    prereleaseStartIndex === -1
+      ? normalizedVersion
+      : normalizedVersion.slice(0, prereleaseStartIndex);
+  const prereleaseVersion =
+    prereleaseStartIndex === -1 ? '' : normalizedVersion.slice(prereleaseStartIndex + 1);
+  const [major, minor, patch] = coreVersion.split('.').map(Number);
+
+  return {
+    coreVersion,
+    major,
+    minor,
+    patch,
+    prerelease: prereleaseVersion ? prereleaseVersion.split('.') : [],
+    version: normalizedVersion
+  };
+}
+
+export function parseComparableReleaseTag(tag) {
+  const parsedTag = parseReleaseTag(tag);
+  return {
+    ...parseComparableReleaseVersion(parsedTag.version),
+    tag: parsedTag.tag
+  };
+}
+
+function comparePrereleaseIdentifiers(left, right) {
+  const leftIsNumeric = numericIdentifierPattern.test(left);
+  const rightIsNumeric = numericIdentifierPattern.test(right);
+
+  if (leftIsNumeric && rightIsNumeric) {
+    return compareNumbers(Number(left), Number(right));
+  }
+
+  if (leftIsNumeric) {
+    return -1;
+  }
+
+  if (rightIsNumeric) {
+    return 1;
+  }
+
+  return compareAscii(left, right);
+}
+
+export function compareParsedReleaseVersions(left, right) {
+  const coreComparison =
+    compareNumbers(left.major, right.major) ||
+    compareNumbers(left.minor, right.minor) ||
+    compareNumbers(left.patch, right.patch);
+
+  if (coreComparison !== 0) {
+    return coreComparison;
+  }
+
+  if (left.prerelease.length === 0 && right.prerelease.length === 0) {
+    return 0;
+  }
+
+  if (left.prerelease.length === 0) {
+    return 1;
+  }
+
+  if (right.prerelease.length === 0) {
+    return -1;
+  }
+
+  const length = Math.max(left.prerelease.length, right.prerelease.length);
+  for (let index = 0; index < length; index += 1) {
+    const leftIdentifier = left.prerelease[index];
+    const rightIdentifier = right.prerelease[index];
+
+    if (leftIdentifier === undefined) {
+      return -1;
+    }
+
+    if (rightIdentifier === undefined) {
+      return 1;
+    }
+
+    const identifierComparison = comparePrereleaseIdentifiers(leftIdentifier, rightIdentifier);
+    if (identifierComparison !== 0) {
+      return identifierComparison;
+    }
+  }
+
+  return 0;
+}
+
+export function isStableReleaseVersion(parsedVersion) {
+  return parsedVersion.prerelease.length === 0;
+}
+
+export function getSemverReleaseTags({ cwd = process.cwd(), run } = {}) {
+  if (typeof run !== 'function') {
+    throw new Error('A git runner is required to list release tags.');
+  }
+
+  const output = run(['tag', '--list', 'v*'], cwd);
+  return output
+    .split('\n')
+    .map((tag) => tag.trim())
+    .filter(Boolean)
+    .map((tag) => {
+      try {
+        return parseComparableReleaseTag(tag);
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean)
+    .sort((left, right) => compareParsedReleaseVersions(right, left))
+    .map(({ tag }) => tag);
 }
 
 export function getNpmDistTagForVersion(version) {
