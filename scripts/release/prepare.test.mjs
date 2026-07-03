@@ -6,6 +6,7 @@ import path from 'node:path';
 import test from 'node:test';
 import {
   assertTagDoesNotExist,
+  main,
   restorePackageJson,
   rollbackReleaseCommitIfTagMissing
 } from './prepare.mjs';
@@ -178,4 +179,57 @@ test('assertTagDoesNotExist rejects unverifiable origin tags', async () => {
   } finally {
     await rm(tempDir, { force: true, recursive: true });
   }
+});
+
+test('main prints a next-version recommendation before clean-tree checks when no version is supplied', async () => {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), 'release-prepare-recommend-'));
+  const packagePath = path.join(tempDir, 'package.json');
+  const originalText = `${JSON.stringify(
+    {
+      name: '@smolpack/eslint-config',
+      version: '1.0.2'
+    },
+    null,
+    2
+  )}\n`;
+  const output = [];
+
+  try {
+    git(tempDir, ['init']);
+    git(tempDir, ['config', 'user.email', 'test@example.com']);
+    git(tempDir, ['config', 'user.name', 'Release Test']);
+
+    await writeFile(packagePath, originalText);
+    git(tempDir, ['add', 'package.json']);
+    git(tempDir, ['commit', '-m', 'Initial release']);
+    git(tempDir, ['tag', 'v1.0.2']);
+
+    await writeFile(path.join(tempDir, 'dirty.txt'), 'dirty\n');
+
+    await main([], {
+      cwd: tempDir,
+      log(line = '') {
+        output.push(line);
+      }
+    });
+
+    const message = output.join('\n');
+    assert.match(message, /Recommended next version: 1\.0\.3/u);
+    assert.match(message, /yarn release:prepare 1\.0\.3/u);
+    assert.equal(await readFile(packagePath, 'utf8'), originalText);
+    assert.match(git(tempDir, ['status', '--porcelain']), /\?\? dirty\.txt/u);
+  } finally {
+    await rm(tempDir, { force: true, recursive: true });
+  }
+});
+
+test('main still rejects invalid explicit release versions', async () => {
+  await assert.rejects(
+    () =>
+      main(['not-a-version'], {
+        cwd: os.tmpdir(),
+        log() {}
+      }),
+    /Release version 'not-a-version' is invalid/u
+  );
 });

@@ -2,7 +2,14 @@ import { execFileSync } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { loadPackageJson, normalizeVersionInput, parseReleaseTag } from './core.mjs';
+import {
+  compareParsedReleaseVersions,
+  getSemverReleaseTags,
+  isStableReleaseVersion,
+  loadPackageJson,
+  normalizeVersionInput,
+  parseComparableReleaseTag
+} from './core.mjs';
 
 function runGit(args, cwd) {
   return execFileSync('git', args, {
@@ -12,136 +19,18 @@ function runGit(args, cwd) {
   }).trim();
 }
 
-const numericIdentifierPattern = /^[0-9]+$/u;
-
-function compareNumbers(left, right) {
-  return Math.sign(left - right);
-}
-
-function compareAscii(left, right) {
-  const length = Math.min(left.length, right.length);
-
-  for (let index = 0; index < length; index += 1) {
-    const characterComparison = compareNumbers(left.charCodeAt(index), right.charCodeAt(index));
-
-    if (characterComparison !== 0) {
-      return characterComparison;
-    }
-  }
-
-  return compareNumbers(left.length, right.length);
-}
-
-function parseComparableTag(tag) {
-  const { version } = parseReleaseTag(tag);
-  const prereleaseStartIndex = version.indexOf('-');
-  const coreVersion =
-    prereleaseStartIndex === -1 ? version : version.slice(0, prereleaseStartIndex);
-  const prereleaseVersion =
-    prereleaseStartIndex === -1 ? '' : version.slice(prereleaseStartIndex + 1);
-  const [major, minor, patch] = coreVersion.split('.').map(Number);
-
-  return {
-    major,
-    minor,
-    patch,
-    prerelease: prereleaseVersion ? prereleaseVersion.split('.') : [],
-    tag
-  };
-}
-
-function comparePrereleaseIdentifiers(left, right) {
-  const leftIsNumeric = numericIdentifierPattern.test(left);
-  const rightIsNumeric = numericIdentifierPattern.test(right);
-
-  if (leftIsNumeric && rightIsNumeric) {
-    return compareNumbers(Number(left), Number(right));
-  }
-
-  if (leftIsNumeric) {
-    return -1;
-  }
-
-  if (rightIsNumeric) {
-    return 1;
-  }
-
-  return compareAscii(left, right);
-}
-
-function compareParsedTags(left, right) {
-  const coreComparison =
-    compareNumbers(left.major, right.major) ||
-    compareNumbers(left.minor, right.minor) ||
-    compareNumbers(left.patch, right.patch);
-
-  if (coreComparison !== 0) {
-    return coreComparison;
-  }
-
-  if (left.prerelease.length === 0 && right.prerelease.length === 0) {
-    return 0;
-  }
-
-  if (left.prerelease.length === 0) {
-    return 1;
-  }
-
-  if (right.prerelease.length === 0) {
-    return -1;
-  }
-
-  const length = Math.max(left.prerelease.length, right.prerelease.length);
-  for (let index = 0; index < length; index += 1) {
-    const leftIdentifier = left.prerelease[index];
-    const rightIdentifier = right.prerelease[index];
-
-    if (leftIdentifier === undefined) {
-      return -1;
-    }
-
-    if (rightIdentifier === undefined) {
-      return 1;
-    }
-
-    const identifierComparison = comparePrereleaseIdentifiers(leftIdentifier, rightIdentifier);
-    if (identifierComparison !== 0) {
-      return identifierComparison;
-    }
-  }
-
-  return 0;
-}
-
-function isStableTag(parsedTag) {
-  return parsedTag.prerelease.length === 0;
-}
-
 export function getSemverTags({ cwd = process.cwd(), run = runGit } = {}) {
-  const output = run(['tag', '--list', 'v*'], cwd);
-  return output
-    .split('\n')
-    .map((tag) => tag.trim())
-    .filter(Boolean)
-    .filter((tag) => {
-      try {
-        parseReleaseTag(tag);
-        return true;
-      } catch {
-        return false;
-      }
-    })
-    .sort((left, right) => compareParsedTags(parseComparableTag(right), parseComparableTag(left)));
+  return getSemverReleaseTags({ cwd, run });
 }
 
 export function getPreviousReleaseTag({ currentTag, cwd = process.cwd(), run = runGit } = {}) {
-  const current = parseComparableTag(currentTag);
+  const current = parseComparableReleaseTag(currentTag);
   const candidates = getSemverTags({ cwd, run })
     .filter((tag) => tag !== currentTag)
-    .map((tag) => parseComparableTag(tag))
-    .filter((candidate) => compareParsedTags(candidate, current) < 0)
-    .filter((candidate) => !isStableTag(current) || isStableTag(candidate))
-    .sort((left, right) => compareParsedTags(right, left));
+    .map((tag) => parseComparableReleaseTag(tag))
+    .filter((candidate) => compareParsedReleaseVersions(candidate, current) < 0)
+    .filter((candidate) => !isStableReleaseVersion(current) || isStableReleaseVersion(candidate))
+    .sort((left, right) => compareParsedReleaseVersions(right, left));
 
   return candidates[0]?.tag ?? null;
 }
